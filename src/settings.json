@@ -1,0 +1,17 @@
+{
+  "steamWeb": {
+    "apiUrl": "http://api.steampowered.com"
+  },
+  "steamStore": {
+    "apiUrl": "https://store.steampowered.com/api"
+  },
+  "discord": {
+    "apiUrl": "https://discord.com/api"
+  },
+  "letsplay": {
+    "categories": {
+      "default": [1, 9, 20, 36],
+      "coop": [9]
+    }
+  }
+}

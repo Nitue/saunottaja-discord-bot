@@ -1,0 +1,10 @@
+version: '3.1'
+services:
+  postgres:
+    image: postgres:13.1-alpine
+    environment:
+      POSTGRES_USER: saunottaja
+      POSTGRES_PASSWORD: saunottaja
+      POSTGRES_DB: saunottaja
+    ports:
+    - 5432:5432

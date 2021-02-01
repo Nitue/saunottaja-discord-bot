@@ -1,0 +1,3 @@
+type SteamAppDetailsResponse = {
+    data: SteamGameDetails
+};
