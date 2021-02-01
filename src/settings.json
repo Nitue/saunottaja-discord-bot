@@ -11,7 +11,16 @@
   "letsplay": {
     "categories": {
       "default": [1, 9, 20, 36],
-      "coop": [9]
+      "coop": [9],
+      "mmo": [20]
+    }
+  },
+  "steam": {
+    "categories": {
+      "1": "Multi-player",
+      "9": "Co-op",
+      "20": "MMO",
+      "36": "Online PvP"
     }
   }
 }

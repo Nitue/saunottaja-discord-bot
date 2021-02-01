@@ -27,8 +27,8 @@ export default class RegisterSteamIdCommand extends BasicCommand {
         })
     }
 
-    getHelp(): string {
-        return `\`steamid <sinun-steam-id>\` rekisteröi Steam-tunnuksesi botille. Steam ID on numerosarja.`;
+    getHelp(): [string, string] {
+        return ['steamid <sinun-steam-id>', 'Rekisteröi Steam-tunnus botille. Steam ID on numerosarja.'];
     }
 
     getKeyword(): string {

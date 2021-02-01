@@ -1,9 +1,10 @@
-import {Client, Message, User} from "discord.js";
+import {Client, Message, MessageEmbed, User} from "discord.js";
 import SteamApi from "../steam/api/steam-api";
 import SteamIdRepository from "../steam/steam-id-repository";
 import BasicCommand from "./basic-command";
 import SteamId from "../steam/steam-id";
 import settings from "../settings.json";
+import SteamAppUtils from "../steam/steam-app-utils";
 
 export default class LetsPlayCommand extends BasicCommand {
 
@@ -23,7 +24,7 @@ export default class LetsPlayCommand extends BasicCommand {
             return message.channel.send(this.getHelp());
         }
 
-        //
+        // Tell the user that parameters were fine and actual execution starts
         await this.sendAcknowledgement(message);
 
         // Get Steam IDs for the users
@@ -42,17 +43,19 @@ export default class LetsPlayCommand extends BasicCommand {
         // Get details of each app ID from Steam
         const games = await this.getSteamAppDetails(matchingAppIds);
 
+        // Choose category
+        const categoryIds = this.getCategoryIds(message);
+
         // Filter games by category
         const gamesToPlay = games
             .filter(game => !!game)
-            .filter(game => this.isGameInCategory(game, settings.letsplay.categories.default))
-            .map(game => game.name);
+            .filter(game => this.isGameInCategory(game, categoryIds));
 
-        return message.channel.send(this.formatGamesResponse(gamesToPlay));
+        return message.channel.send(this.formatGamesResponse(gamesToPlay, categoryIds));
     }
 
-    getHelp(): string {
-        return `\`letsplay <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>\` ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin \`steamid\`-komennolla.`;
+    getHelp(): [string, string] {
+        return ['letsplay [<tyhjä>/coop/mmo] <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>', 'Ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin \`steamid\`-komennolla.'];
     }
 
     getKeyword(): string {
@@ -85,9 +88,17 @@ export default class LetsPlayCommand extends BasicCommand {
             .map(username => username as string);
     }
 
-    private formatGamesResponse(games: string[]): string {
-        const gamesList = games.map((game, index) => `${index+1}. ${game}`);
-        return `Voisitte pelailla näitä pelejä:\n${gamesList.join('\n')}`;
+    private formatGamesResponse(games: SteamGameDetails[], categoryIds: number[]): MessageEmbed {
+        const gamesList = games.map((game, index) => {
+            const storeUrl = SteamAppUtils.getStoreURL(game.steam_appid);
+            return {name: `${index+1}. ${game.name}`, value: storeUrl, inline: true};
+        });
+        const categories = categoryIds.map(id => SteamAppUtils.getCategoryName(id));
+        return new MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('Voisitte pelailla vaikka näitä pelejä...')
+            .addFields(gamesList)
+            .setFooter(categories.join(', '));
     }
 
     private getMatchingAppIds(userAppIds: number[][]): number[]  {
@@ -96,13 +107,22 @@ export default class LetsPlayCommand extends BasicCommand {
         });
     }
 
-    private isGameInCategory(game: SteamGameDetails, categories: number[]): boolean {
+    private isGameInCategory(game: SteamGameDetails, categoryIds: number[]): boolean {
         const gameCategories = game.categories.map(category => category.id);
-        return categories.some(requiredCategory => gameCategories.includes(requiredCategory));
+        return categoryIds.some(requiredCategory => gameCategories.includes(requiredCategory));
     }
 
     private async getSteamAppDetails(matchingAppIds: number[]): Promise<SteamGameDetails[]> {
         return Promise.all(matchingAppIds
             .map(appId => this.steamApi.getAppDetails(appId)));
+    }
+
+    private getCategoryIds(message: Message): number[] {
+        const args = message.content.split(' ');
+        const categoryGroups = Object.keys(settings.letsplay.categories);
+        const categoryGroup = args.find(arg => categoryGroups.includes(arg));
+        return categoryGroup === undefined
+            ? settings.letsplay.categories.default
+            : (settings.letsplay.categories as any)[categoryGroup];
     }
 }
