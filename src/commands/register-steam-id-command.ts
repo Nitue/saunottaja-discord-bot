@@ -1,6 +1,5 @@
 import {Message} from "discord.js";
 import SteamIdRepository from "../steam/steam-id-repository";
-import SteamId from "../steam/steam-id";
 import BasicCommand from "./basic-command";
 
 export default class RegisterSteamIdCommand extends BasicCommand {
@@ -11,7 +10,7 @@ export default class RegisterSteamIdCommand extends BasicCommand {
         super();
     }
 
-    execute(message: Message): Promise<any> {
+    async execute(message: Message): Promise<any> {
         const steamIdAsInt = message.content.split(' ')
             .filter(arg => !!parseInt(arg))
             .pop();
@@ -19,12 +18,10 @@ export default class RegisterSteamIdCommand extends BasicCommand {
             return message.channel.send(this.getHelp());
         }
         const discordUserId = message.author.id;
-        return this.steamIdRepository.getByDiscordUserId(discordUserId).then(steamId => {
-            steamId.steamId = steamIdAsInt;
-            return this.steamIdRepository.save(steamId);
-        }).then(result => {
-            return message.react('👍');
-        })
+        const steamId = await this.steamIdRepository.getByDiscordUserId(discordUserId);
+        steamId.steamId = steamIdAsInt;
+        await this.steamIdRepository.save(steamId);
+        return message.react('👍');
     }
 
     getHelp(): [string, string] {

@@ -43,13 +43,12 @@ export default class LetsPlayCommand extends BasicCommand {
         // Get details of each app ID from Steam
         const games = await this.getSteamAppDetails(matchingAppIds);
 
-        // Choose category
-        const categoryIds = this.getCategoryIds(message);
+        // Choose categories
+        const categoryGroup = this.getCategoryGroup(message);
+        const categoryIds = (settings.letsplay.categories as any)[categoryGroup];
 
-        // Filter games by category
-        const gamesToPlay = games
-            .filter(game => !!game)
-            .filter(game => this.isGameInCategory(game, categoryIds));
+        // Filter games by categories
+        const gamesToPlay = games.filter(game => this.isGameInCategory(game, categoryIds));
 
         return message.channel.send(this.formatGamesResponse(gamesToPlay, categoryIds));
     }
@@ -113,16 +112,14 @@ export default class LetsPlayCommand extends BasicCommand {
     }
 
     private async getSteamAppDetails(matchingAppIds: number[]): Promise<SteamGameDetails[]> {
-        return Promise.all(matchingAppIds
-            .map(appId => this.steamApi.getAppDetails(appId)));
+        const requests = await Promise.all(matchingAppIds.map(appId => this.steamApi.getAppDetails(appId)));
+        return requests.filter(game => !!game);
     }
 
-    private getCategoryIds(message: Message): number[] {
+    private getCategoryGroup(message: Message): string {
         const args = message.content.split(' ');
         const categoryGroups = Object.keys(settings.letsplay.categories);
         const categoryGroup = args.find(arg => categoryGroups.includes(arg));
-        return categoryGroup === undefined
-            ? settings.letsplay.categories.default
-            : (settings.letsplay.categories as any)[categoryGroup];
+        return categoryGroup === undefined ? 'default' : categoryGroup;
     }
 }
