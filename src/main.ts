@@ -1,4 +1,3 @@
-require("axios-debug-log");
 import {Client as DiscordClient, Message} from "discord.js";
 import CommandService from "./commands/command-service";
 import {Client as PgClient} from "pg";

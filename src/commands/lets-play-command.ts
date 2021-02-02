@@ -43,14 +43,19 @@ export default class LetsPlayCommand extends BasicCommand {
         // Get details of each app ID from Steam
         const games = await this.getSteamAppDetails(matchingAppIds);
 
+        // Get games that got no details
+        const errorGames = games.filter(game => this.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
+
         // Choose categories
         const categoryGroup = this.getCategoryGroup(message);
         const categoryIds = (settings.letsplay.categories as any)[categoryGroup];
 
-        // Filter games by categories
-        const gamesToPlay = games.filter(game => this.isGameInCategory(game, categoryIds));
+        // Filter games by categories (and leave out games without details)
+        const gamesToPlay = games
+            .filter(game => errorGames.find(errorGame => errorGame.steam_appid === game.steam_appid) === undefined)
+            .filter(game => this.isGameInCategory(game, categoryIds));
 
-        return message.channel.send(this.formatGamesResponse(gamesToPlay, categoryIds));
+        return message.channel.send(this.formatGamesResponse(gamesToPlay, errorGames, categoryIds));
     }
 
     getHelp(): [string, string] {
@@ -74,8 +79,13 @@ export default class LetsPlayCommand extends BasicCommand {
     }
 
     private getUserSteamAppIds(steamIds: SteamId[]): Promise<number[][]> {
-        return Promise.all(steamIds.map(steamId => this.steamApi.getOwnedGames(steamId.steamId as string)
-            .then(ownedGames => ownedGames.games.map(game => game.appid))));
+        const requests = steamIds.map(steamId => this.steamApi.getOwnedGames(steamId.steamId as string)
+            .then(ownedGames => ownedGames.games.map(game => game.appid))
+            .catch(error => {
+                console.warn('Failed to get owned games', error.message);
+                return [] as number[];
+            }))
+        return Promise.all(requests);
     }
 
     private getUsersWithoutSteamId(message: Message, steamIds: SteamId[]): string[]  {
@@ -87,11 +97,19 @@ export default class LetsPlayCommand extends BasicCommand {
             .map(username => username as string);
     }
 
-    private formatGamesResponse(games: SteamGameDetails[], categoryIds: number[]): MessageEmbed {
+    private formatGamesResponse(games: SteamGameDetails[], errorGames: SteamGameDetails[], categoryIds: number[]): MessageEmbed {
         const gamesList = games.map((game, index) => {
             const storeUrl = SteamAppUtils.getStoreURL(game.steam_appid);
             return {name: `${index+1}. ${game.name}`, value: storeUrl, inline: true};
         });
+        if (errorGames.length > 0) {
+            const errorGamesList = errorGames.map(game => SteamAppUtils.getStoreURL(game.steam_appid)).join('\n');
+            gamesList.push({
+                name: 'Pelejä, joista ei voitu hakea tietoja',
+                value: errorGamesList,
+                inline: false
+            });
+        }
         const categories = categoryIds.map(id => SteamAppUtils.getCategoryName(id));
         return new MessageEmbed()
             .setColor('#0099ff')
@@ -111,9 +129,13 @@ export default class LetsPlayCommand extends BasicCommand {
         return categoryIds.some(requiredCategory => gameCategories.includes(requiredCategory));
     }
 
-    private async getSteamAppDetails(matchingAppIds: number[]): Promise<SteamGameDetails[]> {
-        const requests = await Promise.all(matchingAppIds.map(appId => this.steamApi.getAppDetails(appId)));
-        return requests.filter(game => !!game);
+    private async getSteamAppDetails(appIds: number[]): Promise<SteamGameDetails[]> {
+        const gameDetails = await Promise.all(appIds.map(appId => this.steamApi.getAppDetails(appId)
+            .catch(error => {
+                console.warn('Failed to get app details:', error.message);
+                return SteamAppUtils.getErrorGameDetails(error.config.params.appids);
+            })));
+        return gameDetails.filter(details => !!details);
     }
 
     private getCategoryGroup(message: Message): string {
