@@ -1,17 +1,20 @@
 import {Client, Message, MessageEmbed, User} from "discord.js";
-import SteamApi from "../steam/api/steam-api";
-import SteamIdRepository from "../steam/steam-id-repository";
-import BasicCommand from "./basic-command";
-import SteamId from "../steam/steam-id";
-import settings from "../settings.json";
-import SteamAppUtils from "../steam/steam-app-utils";
+import SteamApi from "../../steam/api/steam-api";
+import SteamIdRepository from "../../steam/steam-id-repository";
+import BasicCommand from "../basic-command";
+import SteamId from "../../steam/steam-id";
+import settings from "../../settings.json";
+import SteamAppUtils from "../../steam/steam-app-utils";
+import LetsPlayMessageFormatter from "./lets-play-message-formatter";
+import CommandUtils from "../command-utils";
 
 export default class LetsPlayCommand extends BasicCommand {
 
     constructor(
         private client: Client,
         private steamIdRepository: SteamIdRepository,
-        private steamApi: SteamApi
+        private steamApi: SteamApi,
+        private letsPlayMessageFormatter: LetsPlayMessageFormatter
     ) {
         super();
     }
@@ -21,7 +24,7 @@ export default class LetsPlayCommand extends BasicCommand {
 
         // Check that there's enough users
         if (users.length < 1) {
-            return message.channel.send(this.getHelp());
+            return message.channel.send(new MessageEmbed().addFields(CommandUtils.getCommandHelpAsEmbedField(this)));
         }
 
         // Tell the user that parameters were fine and actual execution starts
@@ -55,7 +58,7 @@ export default class LetsPlayCommand extends BasicCommand {
             .filter(game => errorGames.find(errorGame => errorGame.steam_appid === game.steam_appid) === undefined)
             .filter(game => this.isGameInCategory(game, categoryIds));
 
-        return message.channel.send(this.formatGamesResponse(gamesToPlay, errorGames, categoryIds));
+        return message.channel.send(this.letsPlayMessageFormatter.format(gamesToPlay, errorGames, categoryIds));
     }
 
     getHelp(): [string, string] {
@@ -95,27 +98,6 @@ export default class LetsPlayCommand extends BasicCommand {
             .map(user => user?.username)
             .filter(username => !!username)
             .map(username => username as string);
-    }
-
-    private formatGamesResponse(games: SteamGameDetails[], errorGames: SteamGameDetails[], categoryIds: number[]): MessageEmbed {
-        const gamesList = games.map((game, index) => {
-            const storeUrl = SteamAppUtils.getStoreURL(game.steam_appid);
-            return {name: `${index+1}. ${game.name}`, value: storeUrl, inline: true};
-        });
-        if (errorGames.length > 0) {
-            const errorGamesList = errorGames.map(game => SteamAppUtils.getStoreURL(game.steam_appid)).join('\n');
-            gamesList.push({
-                name: 'Pelejä, joista ei voitu hakea tietoja',
-                value: errorGamesList,
-                inline: false
-            });
-        }
-        const categories = categoryIds.map(id => SteamAppUtils.getCategoryName(id));
-        return new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Voisitte pelailla vaikka näitä pelejä...')
-            .addFields(gamesList)
-            .setFooter(categories.join(', '));
     }
 
     private getMatchingAppIds(userAppIds: number[][]): number[]  {

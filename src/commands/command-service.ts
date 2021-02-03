@@ -1,26 +1,15 @@
 import Command from "./command";
-import LetsPlayCommand from "./lets-play-command";
 import {Client, Message} from "discord.js";
-import HelpCommand from "./help-command";
-import SteamApi from "../steam/api/steam-api";
-import RegisterSteamIdCommand from "./register-steam-id-command";
 import SteamIdRepository from "../steam/steam-id-repository";
 
 export default class CommandService {
 
-    private readonly commands: Command[];
-    private readonly defaultCommand: Command;
-
     constructor(
+        private readonly commands: Command[],
+        private readonly defaultCommand: Command,
         private discordClient: Client,
         private steamIdRepository: SteamIdRepository
-    ) {
-        this.commands = [
-            new LetsPlayCommand(discordClient, steamIdRepository, new SteamApi()),
-            new RegisterSteamIdCommand(steamIdRepository)
-        ];
-        this.defaultCommand = new HelpCommand(discordClient, this.commands);
-    }
+    ) {}
 
     public findCommand(message: Message): Command | undefined {
         // Ignore own messages
