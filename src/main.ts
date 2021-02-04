@@ -8,9 +8,13 @@ import SteamApi from "./steam/api/steam-api";
 import RegisterSteamIdCommand from "./commands/register-steam-id-command";
 import HelpCommand from "./commands/help-command";
 import CommandService from "./commands/command-service";
+import fs from "fs";
+import * as path from "path";
 
 // Load environment variables from ./.env
 dotenv.config();
+
+const setupDatabaseScript = fs.readFileSync(path.resolve(__dirname, "resources/setup-database.sql")).toString();
 
 // Composition root
 const pgClient = new PgClient({
@@ -28,7 +32,7 @@ const defaultCommand = new HelpCommand(discordClient, commands);
 const commandService = new CommandService(commands, defaultCommand, discordClient, steamIdRepository);
 
 // Connect to database
-pgClient.connect();
+pgClient.connect().then(() => pgClient.query(setupDatabaseScript));
 
 // Discord bot event listeners
 discordClient.on("ready", () => {

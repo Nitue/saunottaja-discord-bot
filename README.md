@@ -17,11 +17,9 @@ Launch database instance:
 
 Create `.env` file and set values like in the `.env.example` file.
 
-Run SQL script `./database/create-database.sql` in the database instance.
-
 ## Running
 
-Compile:
+Build:
 
     npm run build
 

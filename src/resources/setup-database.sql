@@ -1,4 +1,4 @@
-create table steam_id
+create table if not exists steam_id
 (
 	id bigserial not null
 		constraint steam_id_pk
@@ -7,6 +7,6 @@ create table steam_id
 	steam_id varchar(255) not null
 );
 
-create unique index steam_id_discord_user_id_uindex
+create unique index if not exists steam_id_discord_user_id_uindex
 	on steam_id (discord_user_id);
 
