@@ -19,7 +19,7 @@ const setupDatabaseScript = fs.readFileSync(path.resolve(__dirname, "resources/s
 // Composition root
 const pgClient = new PgClient({
     connectionString: process.env.DATABASE_URL,
-    ssl: false
+    ssl: process.env.ENVIRONMENT === 'prod'
 });
 const discordClient = new DiscordClient();
 const steamIdRepository = new SteamIdRepository(pgClient);
@@ -32,7 +32,12 @@ const defaultCommand = new HelpCommand(discordClient, commands);
 const commandService = new CommandService(commands, defaultCommand, discordClient, steamIdRepository);
 
 // Connect to database
-pgClient.connect().then(() => pgClient.query(setupDatabaseScript));
+pgClient.connect()
+    .then(() => pgClient.query(setupDatabaseScript))
+    .catch(() => {
+        console.error('Could not connect to database');
+        process.exit(-1)
+    });
 
 // Discord bot event listeners
 discordClient.on("ready", () => {
