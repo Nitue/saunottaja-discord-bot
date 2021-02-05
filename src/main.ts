@@ -19,7 +19,7 @@ const setupDatabaseScript = fs.readFileSync(path.resolve(__dirname, "resources/s
 // Composition root
 const pgClient = new PgClient({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.ENVIRONMENT === 'prod'
+    ssl: process.env.ENVIRONMENT === 'prod' ? {rejectUnauthorized: false} : false
 });
 const discordClient = new DiscordClient();
 const steamIdRepository = new SteamIdRepository(pgClient);
