@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
+  "engines": {
+    "node": "14.x"
+  },
   "dependencies": {
     "axios": "0.21.1",
     "discord.js": "12.5.1",
