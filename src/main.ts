@@ -34,8 +34,8 @@ const commandService = new CommandService(commands, defaultCommand, discordClien
 // Connect to database
 pgClient.connect()
     .then(() => pgClient.query(setupDatabaseScript))
-    .catch(() => {
-        console.error('Could not connect to database');
+    .catch(error => {
+        console.error('Could not connect to database', error);
         process.exit(-1)
     });
 
