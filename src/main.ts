@@ -46,3 +46,15 @@ discordClient.on("message", (message: Message) => {
     }
 });
 discordClient.login(process.env.DISCORD_BOT_TOKEN);
+
+const shutdown = () => {
+    console.log("Shutting down...");
+    discordClient.destroy();
+    console.log("Discord client disconnected");
+    pgClient.end().then(() => {
+        console.log("PgClient disconnected");
+        process.exit(0);
+    });
+}
+process.on("SIGINT", shutdown);
+process.on("exit", () => process.stdout.write('Good bye'));

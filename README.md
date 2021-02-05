@@ -5,7 +5,7 @@
 * Node 14.15.2 (or later)
 * Docker, Docker Compose (recommended)
 
-## Setup
+## Development setup
 
 Install dependencies:
 
@@ -15,21 +15,16 @@ Launch database instance:
 
     docker-compose up -d
 
-Create `.env` file and set values like in the `.env.example` file.
+Create `.env` file and set values like in the `.env.example` file. Find out your tokens from Steam and Discord.
 
-## Running
-
-Build:
-
-    npm run build
-
-Run compiled JavaScript:
+Compile transparently and run:
 
     npm run start
 
+## Building
 
-## Development
+For example, to build for distribution:
 
-Run compiler in watch mode for immediate compiling when files change:
+    npm run build
 
-    npm run watch
+Output is located in `./dist`
