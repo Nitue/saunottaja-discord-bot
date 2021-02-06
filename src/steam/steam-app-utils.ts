@@ -25,4 +25,9 @@ export default class SteamAppUtils {
             categories: [SteamAppUtils.ERROR_CATEGORY]
         } as SteamGameDetails;
     }
+
+    public static isGameInCategory(game: SteamGameDetails, categoryIds: number[]): boolean {
+        const gameCategories = game.categories.map(category => category.id);
+        return categoryIds.some(requiredCategory => gameCategories.includes(requiredCategory));
+    }
 }

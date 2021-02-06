@@ -46,19 +46,18 @@ export default class LetsPlayCommand extends BasicCommand {
         // Get details of each app ID from Steam
         const games = await this.getSteamAppDetails(matchingAppIds);
 
-        // Get games that got no details
-        const errorGames = games.filter(game => this.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
-
         // Choose categories
         const categoryGroup = this.getCategoryGroup(message);
         const categoryIds = (settings.letsplay.categories as any)[categoryGroup];
 
-        // Filter games by categories (and leave out games without details)
-        const gamesToPlay = games
-            .filter(game => errorGames.find(errorGame => errorGame.steam_appid === game.steam_appid) === undefined)
-            .filter(game => this.isGameInCategory(game, categoryIds));
+        // Filter games by categories
+        const errorGames = games.filter(game => SteamAppUtils.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
+        const gamesToPlay = games.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
 
-        return message.channel.send(this.letsPlayMessageFormatter.format(gamesToPlay, errorGames, categoryIds));
+        const errorGameMessageEmbeds = this.letsPlayMessageFormatter.formatAsUrlList(errorGames, "Pelejä, joista ei voitu hakea tietoja", "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä.");
+        const gameMessageEmbeds = this.letsPlayMessageFormatter.formatAsDetailedFields(gamesToPlay, categoryIds);
+
+        return gameMessageEmbeds.concat(errorGameMessageEmbeds).map(content => message.channel.send(content));
     }
 
     getHelp(): [string, string] {
@@ -104,11 +103,6 @@ export default class LetsPlayCommand extends BasicCommand {
         return userAppIds.reduce((previousAppIds, nextAppIds) => {
             return previousAppIds.filter(x => nextAppIds.includes(x));
         });
-    }
-
-    private isGameInCategory(game: SteamGameDetails, categoryIds: number[]): boolean {
-        const gameCategories = game.categories.map(category => category.id);
-        return categoryIds.some(requiredCategory => gameCategories.includes(requiredCategory));
     }
 
     private async getSteamAppDetails(appIds: number[]): Promise<SteamGameDetails[]> {

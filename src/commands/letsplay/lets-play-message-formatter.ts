@@ -2,22 +2,39 @@ import {EmbedFieldData, MessageEmbed} from "discord.js";
 import SteamAppUtils from "../../steam/steam-app-utils";
 
 export default class LetsPlayMessageFormatter {
-    public format(games: SteamGameDetails[], errorGames: SteamGameDetails[], categoryIds: number[]): MessageEmbed {
-        const gamesList = this.getGamesAsEmbedFieldList(games);
-        if (errorGames.length > 0) {
-            const errorGamesField = this.getGamesAsSingleEmbedField(errorGames, 'Pelejä, joista ei voitu hakea tietoja');
-            gamesList.push(errorGamesField);
-        }
+    public formatAsDetailedFields(games: SteamGameDetails[], categoryIds: number[]): MessageEmbed[] {
         const categories = categoryIds.map(id => SteamAppUtils.getCategoryName(id));
-        return new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Voisitte pelailla vaikka näitä pelejä...')
-            .addFields(gamesList)
-            .setFooter(categories.join(', '));
+        const footer = categories.join(', ');
+        return this.chunk(games, 25).map((chunk, index, arr) => {
+            const page = index + 1;
+            return new MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`Voisitte pelailla vaikka näitä pelejä ${page}/${arr.length}`)
+                .addFields(this.getGamesAsEmbedFieldList(chunk, index * 25))
+                .setFooter(footer);
+        })
     }
 
-    private getGamesAsEmbedFieldList(games: SteamGameDetails[]): EmbedFieldData[] {
-        return games.map((game, index) => this.getGameAsEmbedField(game, index + 1));
+    public formatAsUrlList(games: SteamGameDetails[], title: string, description: string): MessageEmbed[] {
+        if (!games || games.length === 0) {
+            return [];
+        }
+        const gamesList = games.map(game => SteamAppUtils.getStoreURL(game.steam_appid));
+        return this.chunk<string>(gamesList, 20).map((chunk, index, arr) => {
+            const page = index + 1;
+            return new MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${title} ${page}/${arr.length}`)
+                .setDescription(description)
+                .addFields({
+                    name: 'Voisitte pelailla vaikka näitä pelejä',
+                    value: chunk.join('\n')
+                });
+        });
+    }
+
+    private getGamesAsEmbedFieldList(games: SteamGameDetails[], runningNumberConstant: number): EmbedFieldData[] {
+        return games.map((game, index) => this.getGameAsEmbedField(game, index + 1 + runningNumberConstant));
     }
 
     private getGameAsEmbedField(game: SteamGameDetails, runningNumber?: number): EmbedFieldData {
@@ -30,12 +47,7 @@ export default class LetsPlayMessageFormatter {
         };
     }
 
-    private getGamesAsSingleEmbedField(games: SteamGameDetails[], fieldTitle: string): EmbedFieldData {
-        const errorGamesList = games.map(game => SteamAppUtils.getStoreURL(game.steam_appid)).join('\n');
-        return {
-            name: fieldTitle,
-            value: errorGamesList,
-            inline: false
-        };
+    private chunk<T>(arr: T[], n: number): T[][] {
+        return arr.slice(0,(arr.length+n-1)/n|0).map((c,i) => arr.slice(n*i,n*i+n));
     }
 }
