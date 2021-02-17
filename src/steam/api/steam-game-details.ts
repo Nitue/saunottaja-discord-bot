@@ -2,5 +2,7 @@ type SteamGameDetails = {
     name: string,
     steam_appid: number,
     categories: SteamGameCategory[],
-    genres: SteamGameGenre[]
+    genres: SteamGameGenre[],
+    short_description: string,
+    header_image: string
 }

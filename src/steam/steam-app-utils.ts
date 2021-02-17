@@ -1,4 +1,5 @@
 import settings from '../settings.json';
+import uniqueRandom from "unique-random";
 
 export default class SteamAppUtils {
 
@@ -29,5 +30,10 @@ export default class SteamAppUtils {
     public static isGameInCategory(game: SteamGameDetails, categoryIds: number[]): boolean {
         const gameCategories = game.categories.map(category => category.id);
         return categoryIds.some(requiredCategory => gameCategories.includes(requiredCategory));
+    }
+
+    public static getRandom(appIds: number[]): number {
+        const random = uniqueRandom(0, appIds.length - 1);
+        return appIds[random()];
     }
 }

@@ -1,21 +1,21 @@
 import {EmbedFieldData, MessageEmbed} from "discord.js";
 import SteamAppUtils from "../../steam/steam-app-utils";
 
-export default class LetsPlayMessageFormatter {
-    public formatAsDetailedFields(games: SteamGameDetails[], categoryIds: number[]): MessageEmbed[] {
+export default class SteamGameMessageFormatter {
+    public formatAsDetailedFields(games: SteamGameDetails[], categoryIds: number[], title: string): MessageEmbed[] {
         const categories = categoryIds.map(id => SteamAppUtils.getCategoryName(id));
         const footer = categories.join(', ');
         return this.chunk(games, 25).map((chunk, index, arr) => {
             const page = index + 1;
             return new MessageEmbed()
                 .setColor('#0099ff')
-                .setTitle(`Voisitte pelailla vaikka näitä pelejä ${page}/${arr.length}`)
+                .setTitle(`${title} ${page}/${arr.length}`)
                 .addFields(this.getGamesAsEmbedFieldList(chunk, index * 25))
                 .setFooter(footer);
         })
     }
 
-    public formatAsUrlList(games: SteamGameDetails[], title: string, description: string): MessageEmbed[] {
+    public formatAsUrlList(games: SteamGameDetails[], title: string, fieldTitle: string, description: string): MessageEmbed[] {
         if (!games || games.length === 0) {
             return [];
         }
@@ -27,10 +27,19 @@ export default class LetsPlayMessageFormatter {
                 .setTitle(`${title} ${page}/${arr.length}`)
                 .setDescription(description)
                 .addFields({
-                    name: 'Voisitte pelailla vaikka näitä pelejä',
+                    name: fieldTitle,
                     value: chunk.join('\n')
                 });
         });
+    }
+
+    public formatSingleGame(game: SteamGameDetails): MessageEmbed {
+        return new MessageEmbed()
+            .setColor("#0099ff")
+            .setTitle(game.name)
+            .setDescription(game.short_description)
+            .setThumbnail(game.header_image)
+            .setURL(SteamAppUtils.getStoreURL(game.steam_appid));
     }
 
     private getGamesAsEmbedFieldList(games: SteamGameDetails[], runningNumberConstant: number): EmbedFieldData[] {

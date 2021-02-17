@@ -3,10 +3,11 @@ import SteamApi from "../../steam/api/steam-api";
 import SteamIdRepository from "../../steam/steam-id-repository";
 import BasicCommand from "../basic-command";
 import SteamId from "../../steam/steam-id";
-import settings from "../../settings.json";
 import SteamAppUtils from "../../steam/steam-app-utils";
-import LetsPlayMessageFormatter from "./lets-play-message-formatter";
+import SteamGameMessageFormatter from "./steam-game-message-formatter";
 import CommandUtils from "../command-utils";
+import LetsPlayUtils from "./lets-play-utils";
+import LetsPlayRandom from "./lets-play-random";
 
 export default class LetsPlayCommand extends BasicCommand {
 
@@ -14,7 +15,8 @@ export default class LetsPlayCommand extends BasicCommand {
         private client: Client,
         private steamIdRepository: SteamIdRepository,
         private steamApi: SteamApi,
-        private letsPlayMessageFormatter: LetsPlayMessageFormatter
+        private letsPlayRandom: LetsPlayRandom,
+        private steamGameMessageFormatter: SteamGameMessageFormatter
     ) {
         super();
     }
@@ -42,26 +44,38 @@ export default class LetsPlayCommand extends BasicCommand {
         // Get list of Steam app IDs each user has
         const userAppIds = await this.getUserSteamAppIds(steamIds);
         const matchingAppIds = this.getMatchingAppIds(userAppIds);
+        const categoryIds = LetsPlayUtils.getCategoryIds(message);
+
+        const isRandomRequested = message.content.includes("random");
+
+        if (isRandomRequested) {
+            const randomGame = await this.letsPlayRandom.getRandomGame(matchingAppIds, categoryIds);
+            if (randomGame === undefined) {
+                return message.channel.send("Nyt kävi vähän niin, etten löytänyt riittävän nopeasti peliä, joka olisi sopinut hakukriteereihin. Kokeileppa uudelleen...");
+            }
+            return this.steamGameMessageFormatter.formatSingleGame(randomGame);
+        }
 
         // Get details of each app ID from Steam
         const games = await this.getSteamAppDetails(matchingAppIds);
-
-        // Choose categories
-        const categoryGroup = this.getCategoryGroup(message);
-        const categoryIds = (settings.letsplay.categories as any)[categoryGroup];
 
         // Filter games by categories
         const errorGames = games.filter(game => SteamAppUtils.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
         const gamesToPlay = games.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
 
-        const errorGameMessageEmbeds = this.letsPlayMessageFormatter.formatAsUrlList(errorGames, "Pelejä, joista ei voitu hakea tietoja", "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä.");
-        const gameMessageEmbeds = this.letsPlayMessageFormatter.formatAsDetailedFields(gamesToPlay, categoryIds);
+        const errorGameMessageEmbeds = this.steamGameMessageFormatter.formatAsUrlList(
+            errorGames,
+            "Pelejä, joista ei voitu hakea tietoja",
+            "Voisitte pelailla vaikka näitä pelejä",
+            "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä."
+        );
+        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsDetailedFields(gamesToPlay, categoryIds, "Voisitte pelailla vaikka näitä pelejä");
 
         return gameMessageEmbeds.concat(errorGameMessageEmbeds).map(content => message.channel.send(content));
     }
 
     getHelp(): [string, string] {
-        return ['letsplay [<tyhjä>/coop/mmo] <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>', 'Ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin \`steamid\`-komennolla.'];
+        return ['letsplay [random] [<tyhjä>/coop/mmo] <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>', 'Ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin \`steamid\`-komennolla.'];
     }
 
     getKeyword(): string {
@@ -112,12 +126,5 @@ export default class LetsPlayCommand extends BasicCommand {
                 return SteamAppUtils.getErrorGameDetails(error.config.params.appids);
             })));
         return gameDetails.filter(details => !!details);
-    }
-
-    private getCategoryGroup(message: Message): string {
-        const args = message.content.split(' ');
-        const categoryGroups = Object.keys(settings.letsplay.categories);
-        const categoryGroup = args.find(arg => categoryGroups.includes(arg));
-        return categoryGroup === undefined ? 'default' : categoryGroup;
     }
 }

@@ -2,7 +2,7 @@ import {Client as DiscordClient, Message} from "discord.js";
 import dotenv from "dotenv";
 import {Client as PgClient} from "pg";
 import SteamIdRepository from "./steam/steam-id-repository";
-import LetsPlayMessageFormatter from "./commands/letsplay/lets-play-message-formatter";
+import SteamGameMessageFormatter from "./commands/letsplay/steam-game-message-formatter";
 import LetsPlayCommand from "./commands/letsplay/lets-play-command";
 import SteamApi from "./steam/api/steam-api";
 import RegisterSteamIdCommand from "./commands/register-steam-id-command";
@@ -10,6 +10,7 @@ import HelpCommand from "./commands/help-command";
 import CommandService from "./commands/command-service";
 import fs from "fs";
 import * as path from "path";
+import LetsPlayRandom from "./commands/letsplay/lets-play-random";
 
 // Load environment variables from ./.env
 dotenv.config();
@@ -23,9 +24,11 @@ const pgClient = new PgClient({
 });
 const discordClient = new DiscordClient();
 const steamIdRepository = new SteamIdRepository(pgClient);
-const letsPlayMessageFormatter = new LetsPlayMessageFormatter();
+const letsPlayMessageFormatter = new SteamGameMessageFormatter();
+const steamApi = new SteamApi();
+const letsPlayRandom = new LetsPlayRandom(steamApi);
 const commands = [
-    new LetsPlayCommand(discordClient, steamIdRepository, new SteamApi(), letsPlayMessageFormatter),
+    new LetsPlayCommand(discordClient, steamIdRepository, steamApi, letsPlayRandom, letsPlayMessageFormatter),
     new RegisterSteamIdCommand(steamIdRepository)
 ];
 const defaultCommand = new HelpCommand(discordClient, commands);
