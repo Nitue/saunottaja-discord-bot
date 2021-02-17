@@ -20,7 +20,8 @@ export default class SteamApi {
         const apiMethod = 'appdetails';
         const result = await axios.get<any>(`${settings.steamStore.apiUrl}/${apiMethod}`, {
             params: {
-                appids: appId
+                appids: appId,
+                lang: "en"
             }
         });
         return (result.data[`${appId}`] as SteamAppDetailsResponse).data;

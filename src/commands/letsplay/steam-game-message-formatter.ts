@@ -33,12 +33,14 @@ export default class SteamGameMessageFormatter {
         });
     }
 
-    public formatSingleGame(game: SteamGameDetails): MessageEmbed {
+    public formatSingleGame(game: SteamGameDetails, title: string): MessageEmbed {
         return new MessageEmbed()
+            .setAuthor(title)
             .setColor("#0099ff")
             .setTitle(game.name)
             .setDescription(game.short_description)
             .setThumbnail(game.header_image)
+            .setFooter(game.genres.map(genre => genre.description).join(", "))
             .setURL(SteamAppUtils.getStoreURL(game.steam_appid));
     }
 

@@ -1,4 +1,4 @@
-import {Client, Message, MessageEmbed, User} from "discord.js";
+import {Message, MessageEmbed, User} from "discord.js";
 import SteamApi from "../../steam/api/steam-api";
 import SteamIdRepository from "../../steam/steam-id-repository";
 import BasicCommand from "../basic-command";
@@ -12,7 +12,6 @@ import LetsPlayRandom from "./lets-play-random";
 export default class LetsPlayCommand extends BasicCommand {
 
     constructor(
-        private client: Client,
         private steamIdRepository: SteamIdRepository,
         private steamApi: SteamApi,
         private letsPlayRandom: LetsPlayRandom,
@@ -53,7 +52,7 @@ export default class LetsPlayCommand extends BasicCommand {
             if (randomGame === undefined) {
                 return message.channel.send("Nyt kävi vähän niin, etten löytänyt riittävän nopeasti peliä, joka olisi sopinut hakukriteereihin. Kokeileppa uudelleen...");
             }
-            return this.steamGameMessageFormatter.formatSingleGame(randomGame);
+            return message.channel.send(this.steamGameMessageFormatter.formatSingleGame(randomGame, "Miten olisi vaikkapa..."));
         }
 
         // Get details of each app ID from Steam
@@ -87,7 +86,7 @@ export default class LetsPlayCommand extends BasicCommand {
     }
 
     private getUsers(message: Message): User[] {
-        return message.mentions.users.filter(user => user.id !== this.client.user?.id).array();
+        return message.mentions.users.filter(user => user.id !== message.client.user?.id).array();
     }
 
     private getSteamIds(users: User[]): Promise<SteamId[]> {

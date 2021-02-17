@@ -1,12 +1,11 @@
 import Command from "./command";
-import {Client, Message, MessageEmbed} from "discord.js";
+import {Message, MessageEmbed} from "discord.js";
 import BasicCommand from "./basic-command";
 import CommandUtils from "./command-utils";
 
 export default class HelpCommand extends BasicCommand {
 
     constructor(
-        private client: Client,
         private commands: Command[]
     ) {
         super();

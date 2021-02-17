@@ -12,12 +12,13 @@ export default class LetsPlayRandom {
         while(killSwitchCounter < 10) {
             const randomAppId = SteamAppUtils.getRandom(matchingAppIds);
             const game = await this.steamApi.getAppDetails(randomAppId);
-            if (!SteamAppUtils.isGameInCategory(game, categoryIds)) {
+            if (!game || !SteamAppUtils.isGameInCategory(game, categoryIds)) {
                 killSwitchCounter++;
                 continue;
             }
             return game;
         }
+        console.log(`Killswitched after ${killSwitchCounter} tries!`);
         return undefined;
     }
 }

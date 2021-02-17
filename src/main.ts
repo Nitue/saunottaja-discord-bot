@@ -28,10 +28,10 @@ const letsPlayMessageFormatter = new SteamGameMessageFormatter();
 const steamApi = new SteamApi();
 const letsPlayRandom = new LetsPlayRandom(steamApi);
 const commands = [
-    new LetsPlayCommand(discordClient, steamIdRepository, steamApi, letsPlayRandom, letsPlayMessageFormatter),
+    new LetsPlayCommand(steamIdRepository, steamApi, letsPlayRandom, letsPlayMessageFormatter),
     new RegisterSteamIdCommand(steamIdRepository)
 ];
-const defaultCommand = new HelpCommand(discordClient, commands);
+const defaultCommand = new HelpCommand(commands);
 const commandService = new CommandService(commands, defaultCommand, discordClient, steamIdRepository);
 
 // Connect to database
