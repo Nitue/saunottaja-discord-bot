@@ -3,11 +3,10 @@ import SteamApi from "../../steam/api/steam-api";
 import SteamIdRepository from "../../steam/steam-id-repository";
 import BasicCommand from "../basic-command";
 import SteamId from "../../steam/steam-id";
-import SteamAppUtils from "../../steam/steam-app-utils";
-import SteamGameMessageFormatter from "./steam-game-message-formatter";
 import CommandUtils from "../command-utils";
 import LetsPlayUtils from "./lets-play-utils";
 import LetsPlayRandom from "./lets-play-random";
+import LetsPlayList from "./lets-play-list";
 
 export default class LetsPlayCommand extends BasicCommand {
 
@@ -15,7 +14,7 @@ export default class LetsPlayCommand extends BasicCommand {
         private steamIdRepository: SteamIdRepository,
         private steamApi: SteamApi,
         private letsPlayRandom: LetsPlayRandom,
-        private steamGameMessageFormatter: SteamGameMessageFormatter
+        private letsPlayList: LetsPlayList
     ) {
         super();
     }
@@ -45,32 +44,16 @@ export default class LetsPlayCommand extends BasicCommand {
         const matchingAppIds = this.getMatchingAppIds(userAppIds);
         const categoryIds = LetsPlayUtils.getCategoryIds(message);
 
+        // If 'random', do the 'random' letsplay
         const isRandomRequested = message.content.includes("random");
-
         if (isRandomRequested) {
-            const randomGame = await this.letsPlayRandom.getRandomGame(matchingAppIds, categoryIds);
-            if (randomGame === undefined) {
-                return message.channel.send("Nyt kävi vähän niin, etten löytänyt riittävän nopeasti peliä, joka olisi sopinut hakukriteereihin. Kokeileppa uudelleen...");
-            }
-            return message.channel.send(this.steamGameMessageFormatter.formatSingleGame(randomGame, "Miten olisi vaikkapa..."));
+            const response = await this.letsPlayRandom.execute(matchingAppIds, categoryIds);
+            return message.channel.send(response);
         }
 
-        // Get details of each app ID from Steam
-        const games = await this.getSteamAppDetails(matchingAppIds);
-
-        // Filter games by categories
-        const errorGames = games.filter(game => SteamAppUtils.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
-        const gamesToPlay = games.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
-
-        const errorGameMessageEmbeds = this.steamGameMessageFormatter.formatAsUrlList(
-            errorGames,
-            "Pelejä, joista ei voitu hakea tietoja",
-            "Voisitte pelailla vaikka näitä pelejä",
-            "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä."
-        );
-        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsDetailedFields(gamesToPlay, categoryIds, "Voisitte pelailla vaikka näitä pelejä");
-
-        return gameMessageEmbeds.concat(errorGameMessageEmbeds).map(content => message.channel.send(content));
+        // Otherwise do normal 'list' letsplay
+        const responses = await this.letsPlayList.execute(matchingAppIds, categoryIds);
+        return responses.map(response => message.channel.send(response));
     }
 
     getHelp(): [string, string] {
@@ -116,14 +99,5 @@ export default class LetsPlayCommand extends BasicCommand {
         return userAppIds.reduce((previousAppIds, nextAppIds) => {
             return previousAppIds.filter(x => nextAppIds.includes(x));
         });
-    }
-
-    private async getSteamAppDetails(appIds: number[]): Promise<SteamGameDetails[]> {
-        const gameDetails = await Promise.all(appIds.map(appId => this.steamApi.getAppDetails(appId)
-            .catch(error => {
-                console.warn('Failed to get app details:', error.message);
-                return SteamAppUtils.getErrorGameDetails(error.config.params.appids);
-            })));
-        return gameDetails.filter(details => !!details);
     }
 }

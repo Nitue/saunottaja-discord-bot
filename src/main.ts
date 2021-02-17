@@ -11,6 +11,7 @@ import CommandService from "./commands/command-service";
 import fs from "fs";
 import * as path from "path";
 import LetsPlayRandom from "./commands/letsplay/lets-play-random";
+import LetsPlayList from "./commands/letsplay/lets-play-list";
 
 // Load environment variables from ./.env
 dotenv.config();
@@ -26,9 +27,10 @@ const discordClient = new DiscordClient();
 const steamIdRepository = new SteamIdRepository(pgClient);
 const letsPlayMessageFormatter = new SteamGameMessageFormatter();
 const steamApi = new SteamApi();
-const letsPlayRandom = new LetsPlayRandom(steamApi);
+const letsPlayRandom = new LetsPlayRandom(steamApi, letsPlayMessageFormatter);
+const letsPlayList = new LetsPlayList(steamApi, letsPlayMessageFormatter);
 const commands = [
-    new LetsPlayCommand(steamIdRepository, steamApi, letsPlayRandom, letsPlayMessageFormatter),
+    new LetsPlayCommand(steamIdRepository, steamApi, letsPlayRandom, letsPlayList),
     new RegisterSteamIdCommand(steamIdRepository)
 ];
 const defaultCommand = new HelpCommand(commands);
