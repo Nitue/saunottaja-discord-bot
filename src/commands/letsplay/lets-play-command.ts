@@ -7,6 +7,8 @@ import CommandUtils from "../command-utils";
 import LetsPlayUtils from "./lets-play-utils";
 import LetsPlayRandom from "./lets-play-random";
 import LetsPlayList from "./lets-play-list";
+import fi from "../../locale/fi.json";
+import LocaleUtils from "../../locale/locale-utils";
 
 export default class LetsPlayCommand extends BasicCommand {
 
@@ -36,7 +38,7 @@ export default class LetsPlayCommand extends BasicCommand {
         // Check if some user's have not registered their Steam account
         const notFoundUsers = this.getUsersWithoutSteamId(message, steamIds);
         if (notFoundUsers.length > 0) {
-            return message.channel.send(`Näyttää siltä, että Steam-tunnus ei ole rekisteröity käyttäjillä: ${notFoundUsers.join(', ')}. En voi siis selvittää, mitä pelejä voitte pelata. Rekisteröi Steam-tunnus \`steamid\`-komennolla.`)
+            return message.channel.send(LocaleUtils.process(fi.command.letsplay.steam_account_missing, [notFoundUsers.join(', ')]));
         }
 
         // Get list of Steam app IDs each user has
