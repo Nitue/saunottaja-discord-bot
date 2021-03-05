@@ -8,15 +8,12 @@ import SteamApi from "./steam/api/steam-api";
 import RegisterSteamIdCommand from "./commands/register-steam-id-command";
 import HelpCommand from "./commands/help-command";
 import CommandService from "./commands/command-service";
-import fs from "fs";
-import * as path from "path";
 import LetsPlayRandom from "./commands/letsplay/lets-play-random";
 import LetsPlayList from "./commands/letsplay/lets-play-list";
+import migrate from "./db/migration";
 
 // Load environment variables from ./.env
 dotenv.config();
-
-const setupDatabaseScript = fs.readFileSync(path.resolve(__dirname, "resources/setup-database.sql")).toString();
 
 // Composition root
 const pgClient = new PgClient({
@@ -38,7 +35,7 @@ const commandService = new CommandService(commands, defaultCommand, discordClien
 
 // Connect to database
 pgClient.connect()
-    .then(() => pgClient.query(setupDatabaseScript))
+    .then(() => migrate(pgClient))
     .catch(error => {
         console.error('Could not connect to database', error);
         process.exit(-1)
