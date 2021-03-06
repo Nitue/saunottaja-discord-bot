@@ -1,6 +1,8 @@
 import settings from '../../settings.json';
 import axios from "axios";
+import {singleton} from "tsyringe";
 
+@singleton()
 export default class SteamApi {
 
     public async getOwnedGames(steamId: string): Promise<SteamOwnedGames> {

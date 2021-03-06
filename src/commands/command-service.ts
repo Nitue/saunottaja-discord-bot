@@ -1,14 +1,14 @@
 import Command from "./command";
 import {Client, Message} from "discord.js";
-import SteamIdRepository from "../steam/steam-id-repository";
+import {inject, singleton} from "tsyringe";
 
+@singleton()
 export default class CommandService {
 
     constructor(
-        private readonly commands: Command[],
-        private readonly defaultCommand: Command,
-        private discordClient: Client,
-        private steamIdRepository: SteamIdRepository
+        @inject("commands") private readonly commands: Command[],
+        @inject("defaultCommand") private readonly defaultCommand: Command,
+        @inject("discordClient") private discordClient: Client
     ) {}
 
     public findCommand(message: Message): Command | undefined {
@@ -26,12 +26,12 @@ export default class CommandService {
         }
 
         console.log('Looking for a command...');
-        const supportedCommands = this.commands.filter(command => command.supports(message));
-        if (supportedCommands.length === 0) {
+        const supportedCommand = this.commands.find(command => command.supports(message));
+        if (!supportedCommand) {
             console.log('Command is not supported. Returning default command!');
             return this.defaultCommand;
         }
         console.log('Found a command!');
-        return supportedCommands[0];
+        return supportedCommand;
     }
 }

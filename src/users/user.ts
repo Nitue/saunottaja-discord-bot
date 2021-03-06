@@ -1,4 +1,4 @@
-export default class SteamId {
+export default class User {
     constructor(
         public discordUserId: string,
         public steamId?: string,

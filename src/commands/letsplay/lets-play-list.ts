@@ -2,7 +2,9 @@ import SteamAppUtils from "../../steam/steam-app-utils";
 import SteamApi from "../../steam/api/steam-api";
 import SteamGameMessageFormatter from "./steam-game-message-formatter";
 import {MessageEmbed} from "discord.js";
+import {singleton} from "tsyringe";
 
+@singleton()
 export default class LetsPlayList {
     constructor(
         private steamApi: SteamApi,

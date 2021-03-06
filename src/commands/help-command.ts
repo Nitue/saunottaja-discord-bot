@@ -2,11 +2,13 @@ import Command from "./command";
 import {Message, MessageEmbed} from "discord.js";
 import BasicCommand from "./basic-command";
 import CommandUtils from "./command-utils";
+import {inject, singleton} from "tsyringe";
 
+@singleton()
 export default class HelpCommand extends BasicCommand {
 
     constructor(
-        private commands: Command[]
+        @inject("commands") private commands: Command[]
     ) {
         super();
     }

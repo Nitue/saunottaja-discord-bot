@@ -1,31 +1,36 @@
-import {Message, MessageEmbed, User} from "discord.js";
+import {Message, MessageEmbed, User as DiscordUser} from "discord.js";
 import SteamApi from "../../steam/api/steam-api";
-import SteamIdRepository from "../../steam/steam-id-repository";
+import UserRepository from "../../users/user-repository";
 import BasicCommand from "../basic-command";
-import SteamId from "../../steam/steam-id";
+import User from "../../users/user";
 import CommandUtils from "../command-utils";
 import LetsPlayUtils from "./lets-play-utils";
 import LetsPlayRandom from "./lets-play-random";
 import LetsPlayList from "./lets-play-list";
 import fi from "../../locale/fi.json";
 import LocaleUtils from "../../locale/locale-utils";
+import {singleton} from "tsyringe";
+import MessagePagingService from "../../messages/message-paging-service";
+import MessagePagingUtils from "../../messages/message-paging-utils";
 
+@singleton()
 export default class LetsPlayCommand extends BasicCommand {
 
     constructor(
-        private steamIdRepository: SteamIdRepository,
+        private userRepository: UserRepository,
         private steamApi: SteamApi,
         private letsPlayRandom: LetsPlayRandom,
-        private letsPlayList: LetsPlayList
+        private letsPlayList: LetsPlayList,
+        private messagePagingService: MessagePagingService
     ) {
         super();
     }
 
     async execute(message: Message): Promise<any> {
-        const users = this.getUsers(message);
+        const discordUsers = this.getDiscordUsers(message);
 
         // Check that there's enough users
-        if (users.length < 1) {
+        if (discordUsers.length < 1) {
             return message.channel.send(new MessageEmbed().addFields(CommandUtils.getCommandHelpAsEmbedField(this)));
         }
 
@@ -33,16 +38,16 @@ export default class LetsPlayCommand extends BasicCommand {
         await this.sendAcknowledgement(message);
 
         // Get Steam IDs for the users
-        const steamIds = await this.getSteamIds(users);
+        const users = await this.getUsers(discordUsers);
 
         // Check if some user's have not registered their Steam account
-        const notFoundUsers = this.getUsersWithoutSteamId(message, steamIds);
+        const notFoundUsers = this.getUsersWithoutSteamId(message, users);
         if (notFoundUsers.length > 0) {
             return message.channel.send(LocaleUtils.process(fi.command.letsplay.steam_account_missing, [notFoundUsers.join(', ')]));
         }
 
         // Get list of Steam app IDs each user has
-        const userAppIds = await this.getUserSteamAppIds(steamIds);
+        const userAppIds = await this.getUserSteamAppIds(users);
         const matchingAppIds = this.getMatchingAppIds(userAppIds);
         const categoryIds = LetsPlayUtils.getCategoryIds(message);
 
@@ -54,8 +59,11 @@ export default class LetsPlayCommand extends BasicCommand {
         }
 
         // Otherwise do normal 'list' letsplay
-        const responses = await this.letsPlayList.execute(matchingAppIds, categoryIds);
-        return responses.map(response => message.channel.send(response));
+        const messages = await this.letsPlayList.execute(matchingAppIds, categoryIds);
+        return message.channel.send(messages[0]).then(async (sentMessage) => {
+            await this.messagePagingService.addPaging(sentMessage.id, messages);
+            return MessagePagingUtils.addControls(sentMessage);
+        });
     }
 
     getHelp(): [string, string] {
@@ -70,15 +78,15 @@ export default class LetsPlayCommand extends BasicCommand {
         return message.channel.send('Hmm... Odotas hetki, niin maiskuttelen tätä datan määrää vähän...');
     }
 
-    private getUsers(message: Message): User[] {
+    private getDiscordUsers(message: Message): DiscordUser[] {
         return message.mentions.users.filter(user => user.id !== message.client.user?.id).array();
     }
 
-    private getSteamIds(users: User[]): Promise<SteamId[]> {
-        return Promise.all(users.map(user => this.steamIdRepository.getByDiscordUserId(user.id)));
+    private getUsers(discordUsers: DiscordUser[]): Promise<User[]> {
+        return Promise.all(discordUsers.map(discordUser => this.userRepository.getByDiscordUserId(discordUser.id)));
     }
 
-    private getUserSteamAppIds(steamIds: SteamId[]): Promise<number[][]> {
+    private getUserSteamAppIds(steamIds: User[]): Promise<number[][]> {
         const requests = steamIds.map(steamId => this.steamApi.getOwnedGames(steamId.steamId as string)
             .then(ownedGames => ownedGames.games.map(game => game.appid))
             .catch(error => {
@@ -88,8 +96,8 @@ export default class LetsPlayCommand extends BasicCommand {
         return Promise.all(requests);
     }
 
-    private getUsersWithoutSteamId(message: Message, steamIds: SteamId[]): string[]  {
-        const notFoundSteamIds = steamIds.filter(steamId => !steamId.steamId);
+    private getUsersWithoutSteamId(message: Message, users: User[]): string[]  {
+        const notFoundSteamIds = users.filter(user => !user.steamId);
         return notFoundSteamIds
             .map(steamId => message.mentions.users.find(user => user.id === steamId.discordUserId))
             .map(user => user?.username)

@@ -1,12 +1,14 @@
 import {Message, MessageEmbed} from "discord.js";
-import SteamIdRepository from "../steam/steam-id-repository";
+import UserRepository from "../users/user-repository";
 import BasicCommand from "./basic-command";
 import CommandUtils from "./command-utils";
+import {singleton} from "tsyringe";
 
+@singleton()
 export default class RegisterSteamIdCommand extends BasicCommand {
 
     constructor(
-        private steamIdRepository: SteamIdRepository
+        private steamIdRepository: UserRepository
     ) {
         super();
     }

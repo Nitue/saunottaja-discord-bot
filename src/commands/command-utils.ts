@@ -1,4 +1,4 @@
-import {EmbedField, MessageEmbed} from "discord.js";
+import {EmbedField} from "discord.js";
 import Command from "./command";
 
 export default class CommandUtils {
