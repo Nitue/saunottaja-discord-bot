@@ -52,6 +52,7 @@ const shutdown = async () => {
     });
 }
 process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 process.on("exit", () => process.stdout.write('Good bye'));
 
 // Start the application

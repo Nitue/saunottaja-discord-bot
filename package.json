@@ -31,9 +31,9 @@
   "scripts": {
     "start": "ts-node --files ./src/main.ts",
     "clean": "npx rimraf ./dist",
-    "copy-resources": "npx copyfiles -u 1 ./src/resources/** ./dist",
+    "copy-resources": "npx copyfiles -u 1 \"./src/resources/**\" \"./dist\"",
     "compile": "npx tsc",
-    "build": "npm run clean && npm run compile && npm run copy-resources && npm run postbuild",
+    "build": "npm run clean && npm run compile && npm run copy-resources",
     "postbuild": "cp package.json ./dist/package.json && cd dist && npm install --only=production",
     "test": "npx jasmine-ts --config=jasmine.json",
     "watch": "npx tsc --watch"
