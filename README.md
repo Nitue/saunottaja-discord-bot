@@ -11,6 +11,8 @@ Currently the bot can:
 
 1. Add rest of the localization of messages
 2. Find out games on Steam wishlists
+3. Dockerize development environment completely
+4. AWS CDK for AWS deployment (?)
 
 ## Requirements
 
