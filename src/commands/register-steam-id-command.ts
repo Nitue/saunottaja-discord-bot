@@ -3,6 +3,7 @@ import UserRepository from "../users/user-repository";
 import BasicCommand from "./basic-command";
 import CommandUtils from "./command-utils";
 import {singleton} from "tsyringe";
+import {locale} from "../locale/locale-utils";
 
 @singleton()
 export default class RegisterSteamIdCommand extends BasicCommand {
@@ -22,12 +23,12 @@ export default class RegisterSteamIdCommand extends BasicCommand {
             await this.persistSteamId(steamIdNumber, message.author.id);
             return message.react('👍');
         } catch (error) {
-            return message.channel.send('Nyt meni jotain vikaan...!');
+            return message.react('👎');
         }
     }
 
     getHelp(): [string, string] {
-        return ['steamid <sinun-steam-id>', 'Rekisteröi Steam-tunnus botille. Steam ID on numerosarja.'];
+        return [locale.command.steamid.help.command, locale.command.steamid.help.description];
     }
 
     getKeyword(): string {

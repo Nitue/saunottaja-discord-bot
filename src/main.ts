@@ -1,6 +1,10 @@
 import "reflect-metadata";
-import {Client as DiscordClient} from "discord.js";
+
+// Load environment variables from ./.env
 import dotenv from "dotenv";
+dotenv.config();
+
+import {Client as DiscordClient} from "discord.js";
 import HelpCommand from "./commands/help-command";
 import {container} from "tsyringe";
 import LetsPlayCommand from "./commands/letsplay/lets-play-command";
@@ -9,9 +13,6 @@ import {Client as PgClient} from "pg";
 import App from "./app";
 import NextPageReaction from "./reactions/next-page-reaction";
 import PreviousPageReaction from "./reactions/previous-page-reaction";
-
-// Load environment variables from ./.env
-dotenv.config();
 
 // Register db client
 const pgClient = new PgClient({

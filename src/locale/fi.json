@@ -1,7 +1,0 @@
-{
-  "command": {
-    "letsplay": {
-      "steam_account_missing": "Näyttää siltä, että Steam-tunnus ei ole rekisteröity käyttäjillä: {0}. En voi siis selvittää, mitä pelejä voitte pelata. Rekisteröi Steam-tunnus `steamid`-komennolla."
-    }
-  }
-}

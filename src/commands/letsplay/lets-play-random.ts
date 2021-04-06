@@ -3,6 +3,7 @@ import SteamApi from "../../steam/api/steam-api";
 import SteamGameMessageFormatter from "./steam-game-message-formatter";
 import {MessageEmbed} from "discord.js";
 import {singleton} from "tsyringe";
+import {locale} from "../../locale/locale-utils";
 
 @singleton()
 export default class LetsPlayRandom {
@@ -15,9 +16,9 @@ export default class LetsPlayRandom {
     public async execute(matchingAppIds: number[], categoryIds: number[]): Promise<MessageEmbed | string> {
         const randomGame = await this.getRandomGame(matchingAppIds, categoryIds);
         if (randomGame === undefined) {
-            return "Nyt kävi vähän niin, etten löytänyt riittävän nopeasti peliä, joka olisi sopinut hakukriteereihin. Kokeileppa uudelleen...";
+            return locale.command.letsplay.random_death_switch;
         }
-        return this.steamGameMessageFormatter.formatSingleGame(randomGame, "Miten olisi vaikkapa...");
+        return this.steamGameMessageFormatter.formatSingleGame(randomGame, locale.command.letsplay.how_about);
     }
 
     private async getRandomGame(matchingAppIds: number[], categoryIds: number[]): Promise<SteamGameDetails | undefined> {

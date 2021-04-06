@@ -3,6 +3,7 @@ import {Message, MessageEmbed} from "discord.js";
 import BasicCommand from "./basic-command";
 import CommandUtils from "./command-utils";
 import {inject, singleton} from "tsyringe";
+import {locale} from "../locale/locale-utils";
 
 @singleton()
 export default class HelpCommand extends BasicCommand {
@@ -16,8 +17,8 @@ export default class HelpCommand extends BasicCommand {
     execute(message: Message): Promise<any> {
         const helps = this.commands.map(command => CommandUtils.getCommandHelpAsEmbedField(command))
         return message.channel.send(new MessageEmbed()
-            .setTitle('Ohjeet')
-            .setDescription('Viestissä pitää mainita minut, ellet lähetä yksityisviestiä. Kaikki toiminnot, joissa pitää mainita muu käyttäjä eivät toimi yksityisviestitse!')
+            .setTitle(locale.command.help.title)
+            .setDescription(locale.command.help.description)
             .addFields(helps)
         );
     }

@@ -3,6 +3,7 @@ import SteamApi from "../../steam/api/steam-api";
 import SteamGameMessageFormatter from "./steam-game-message-formatter";
 import {MessageEmbed} from "discord.js";
 import {singleton} from "tsyringe";
+import {locale} from "../../locale/locale-utils";
 
 @singleton()
 export default class LetsPlayList {
@@ -15,11 +16,11 @@ export default class LetsPlayList {
         const {games, unknownGames} = await this.getGameList(matchingAppIds, categoryIds);
         const unknownGameMessageEmbeds = this.steamGameMessageFormatter.formatAsUrlList(
             unknownGames,
-            "Pelejä, joista ei voitu hakea tietoja",
-            "Voisitte pelailla vaikka näitä pelejä",
-            "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä."
+            locale.command.letsplay.games_without_info,
+            locale.command.letsplay.you_could_play_these,
+            locale.command.letsplay.games_without_info_detailed
         );
-        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsDetailedFields(games, categoryIds, "Voisitte pelailla vaikka näitä pelejä");
+        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsDetailedFields(games, categoryIds, locale.command.letsplay.you_could_play_these);
         return gameMessageEmbeds.concat(unknownGameMessageEmbeds);
     }
 

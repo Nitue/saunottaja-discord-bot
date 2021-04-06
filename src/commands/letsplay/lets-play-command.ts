@@ -7,8 +7,7 @@ import CommandUtils from "../command-utils";
 import LetsPlayUtils from "./lets-play-utils";
 import LetsPlayRandom from "./lets-play-random";
 import LetsPlayList from "./lets-play-list";
-import fi from "../../locale/fi.json";
-import LocaleUtils from "../../locale/locale-utils";
+import {locale, LocaleUtils} from "../../locale/locale-utils";
 import {singleton} from "tsyringe";
 import MessagePagingService from "../../messages/message-paging-service";
 import MessagePagingUtils from "../../messages/message-paging-utils";
@@ -35,7 +34,7 @@ export default class LetsPlayCommand extends BasicCommand {
         }
 
         // Tell the user that parameters were fine and actual execution starts
-        await this.sendAcknowledgement(message);
+        await message.react('👍');
 
         // Get Steam IDs for the users
         const users = await this.getUsers(discordUsers);
@@ -43,7 +42,7 @@ export default class LetsPlayCommand extends BasicCommand {
         // Check if some user's have not registered their Steam account
         const notFoundUsers = this.getUsersWithoutSteamId(message, users);
         if (notFoundUsers.length > 0) {
-            return message.channel.send(LocaleUtils.process(fi.command.letsplay.steam_account_missing, [notFoundUsers.join(', ')]));
+            return message.channel.send(LocaleUtils.process(locale.command.letsplay.steam_account_missing, [notFoundUsers.join(', ')]));
         }
 
         // Get list of Steam app IDs each user has
@@ -67,15 +66,11 @@ export default class LetsPlayCommand extends BasicCommand {
     }
 
     getHelp(): [string, string] {
-        return ['letsplay [random] [<tyhjä>/coop/mmo] <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>', 'Ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin \`steamid\`-komennolla.'];
+        return [locale.command.letsplay.help.command, locale.command.letsplay.help.description];
     }
 
     getKeyword(): string {
         return "letsplay";
-    }
-
-    private sendAcknowledgement(message: Message): Promise<any> {
-        return message.channel.send('Hmm... Odotas hetki, niin maiskuttelen tätä datan määrää vähän...');
     }
 
     private getDiscordUsers(message: Message): DiscordUser[] {

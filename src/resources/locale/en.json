@@ -1,0 +1,26 @@
+{
+  "command": {
+    "letsplay": {
+      "help": {
+        "command": "letsplay [random] [<empty>/coop/mmo] <@You> <@Friend> ... <@AnotherFriend>",
+        "description": "Finds out what games you could play together. Register your Steam ID first with `steamid` command."
+      },
+      "steam_account_missing": "Looks like Steam ID is not registered by: {0}. I cannot find out which games you could play. Please, register your Steam ID with `steamid` command.",
+      "random_death_switch": "Well, it seems I didn't find a game fast enough. Sorry about that. Could you try again?",
+      "how_about": "How about...",
+      "games_without_info": "Games which I couldn't find more info",
+      "games_without_info_detailed": "More details could not be fetched for these games. The reason could be temporary network issues. This list may contain single-player games.",
+      "you_could_play_these": "You could play these games"
+    },
+    "steamid": {
+      "help": {
+        "command": "steamid <your-steam-id>",
+        "description": "Register your Steam ID for the bot. Your Steam ID is a number sequence."
+      }
+    },
+    "help": {
+      "title": "Instructions",
+      "description": "You have to mention me in your message, unless you send a private message. Any command that requires mentions of other users will not work via private messages!"
+    }
+  }
+}
