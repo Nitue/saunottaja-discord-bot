@@ -13,6 +13,8 @@ Currently the bot can:
 2. Find out games on Steam wishlists
 3. Dockerize development environment completely
 4. AWS CDK for AWS deployment (?)
+5. Find out which Windows games are playable via SteamPlay on Linux
+6. Add unit tests
 
 ## Requirements
 
