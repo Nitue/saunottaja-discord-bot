@@ -9,12 +9,11 @@ Currently the bot can:
 
 ## Things to do
 
-1. Add rest of the localization of messages
-2. Find out games on Steam wishlists
-3. Dockerize development environment completely
-4. AWS CDK for AWS deployment (?)
-5. Find out which Windows games are playable via SteamPlay on Linux
-6. Add unit tests
+1. Find out games on Steam wishlists
+2. Dockerize development environment completely
+3. AWS CDK for AWS deployment (?)
+4. Find out which Windows games are playable via SteamPlay on Linux
+5. Add unit tests
 
 ## Requirements
 
