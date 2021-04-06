@@ -1,11 +1,11 @@
 # Saunottaja Discord Bot
 
-Somewhat specific bot for a specific discord server.
+Saunottaja is a Discord bot which can find out what Steam games you and your friends could play together.
 
 Currently the bot can:
 
-1. find out what Steam games you can play with the tagged users
-2. suggest a random game you can play with tagged users
+1. find out what Steam games you can play with the tagged users. E.g. `@Saunottaja letsplay @You @YourFriend @YourAnotherFriend`
+2. suggest a random game you can play with tagged users. E.g. `@Saunottaja letsplay random @You @YourFriend @YourAnotherFriend`
 
 ## Things to do
 
@@ -17,7 +17,8 @@ Currently the bot can:
 ## Requirements
 
 * Node 14.15.2 (or later)
-* Docker, Docker Compose (recommended)
+* Docker, Docker Compose
+* Steam API key
 
 ## Development setup
 
