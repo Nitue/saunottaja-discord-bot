@@ -54,7 +54,7 @@ const shutdown = async () => {
 }
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-process.on("exit", () => process.stdout.write('Good bye'));
+process.on("exit", () => process.stdout.write('Good bye\n\n'));
 
 // Start the application
 const app = container.resolve(App);

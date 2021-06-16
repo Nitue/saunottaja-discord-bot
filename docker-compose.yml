@@ -1,10 +1,20 @@
-version: '3.1'
+version: '3.4'
 services:
+  saunottaja-build:
+    build:
+      target: build
+      context: .
+    env_file:
+      - .env
+    command: "npx tsnd --respawn --files ./src/main.ts"
+    volumes:
+      - ./src:/saunottaja/src
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:13.1-alpine
     environment:
       POSTGRES_USER: saunottaja
       POSTGRES_PASSWORD: saunottaja
       POSTGRES_DB: saunottaja
-    ports:
-    - 5432:5432

@@ -4,45 +4,57 @@ Saunottaja is a Discord bot which can find out what Steam games you and your fri
 
 ![Saunottaja letsplay command](doc/saunottaja-discord-bot.png)
 
-Currently the bot can:
+# What can it do?
 
-1. find out what Steam games you can play with the tagged users. E.g. `@Saunottaja letsplay @You @YourFriend @YourAnotherFriend`. Results are paged and can be browsed with arrow reactions on the message.
-2. suggest a random game you can play with tagged users. E.g. `@Saunottaja letsplay random @You @YourFriend @YourAnotherFriend`
+1. `@Saunottaja letsplay @You @YourFriend @YourAnotherFriend` will list all games you can play with the mentioned users.
+2. `@Saunottaja letsplay random @You @YourFriend @YourAnotherFriend` will suggest a random game you can play with tagged users.
+3. `@Saunottaja steamid 123123` will register `123123` to as your Steam ID for previously listed commands to work.
+4. Mentioning `@Saunottaja` without recognized command will print the instructions for all commands.
 
-## Things to do
+# Things to do
 
 1. Find out games on Steam wishlists
-2. Dockerize development environment completely
-3. AWS CDK for AWS deployment (?)
-4. Find out which Windows games are playable via SteamPlay on Linux
-5. Add unit tests
+2. AWS CDK for AWS deployment (?)
+3. Find out which Windows games are playable via SteamPlay on Linux
+4. Add unit tests
 
-## Requirements
+# Known issues and limitations
 
-* Node 14.15.2 (or later)
-* Docker, Docker Compose
-* Steam API key
+1. Steam API has limit of 100000 requests per day. 
+2. Some APIs also have a limit for frequent requests which renews in few minutes after `HTTP 429` is given.
+   
+For these reasons, the **bot is currently only suitable for small servers where constant usage is not needed**. Additionally, usage on multiple servers is not suitable for these reasons. 
 
-## Development setup
+# Development
 
-Install dependencies:
+You can also follow these instructions for running the bot locally, but the used image is not optimized for production usage.
 
-    npm install
+## Prerequisites
 
-Launch database instance:
+1. Create an application on the [Discord Developer Portal](https://discord.com/developers/applications) and add a bot to your application. Take a note of your bot token.
+2. Get your [Steam API key](https://steamcommunity.com/dev/apikey).
 
-    docker-compose up -d
+Note: API keys and tokens are private information, and you should never share these with anyone.
 
-Create `.env` file and set values like in the `.env.example` file. Find out your tokens from Steam and Discord.
+3. Install [Docker](https://www.docker.com/).
+4. Install Node 14.x (or later). Not *required* but recommended.
 
-Compile transparently and run:
+## Setup
 
-    npm run start
+Create `.env` file and set values like in the `.env.example` file. Paste your Steam API key and Discord bot token here.
 
-## Building
+Launch the application with compose:
 
-For example, to build for distribution:
+```shell
+$ docker-compose up -d
+```
 
-    npm run build
+Editing files in `src` folder should trigger building and restarting of the application automatically.
 
-Output is located in `./dist`
+For intellisense to work in your editor, node modules are needed:
+
+```shell
+$ npm install
+```
+
+# Running in production
