@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.9'
 services:
   saunottaja-build:
     build:
@@ -9,6 +9,19 @@ services:
     command: "npx tsnd --respawn --files ./src/main.ts"
     volumes:
       - ./src:/saunottaja/src
+    profiles:
+      - dev
+    depends_on:
+      - postgres
+
+  saunottaja:
+    image: saunottaja
+    build:
+      context: .
+    env_file:
+      - .env
+    profiles:
+      - prod
     depends_on:
       - postgres
 
