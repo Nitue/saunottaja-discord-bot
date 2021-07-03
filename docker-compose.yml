@@ -31,3 +31,5 @@ services:
       POSTGRES_USER: saunottaja
       POSTGRES_PASSWORD: saunottaja
       POSTGRES_DB: saunottaja
+    expose:
+      - 5432
