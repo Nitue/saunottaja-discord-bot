@@ -25,13 +25,10 @@ export default class CommandService {
             return undefined;
         }
 
-        console.log('Looking for a command...');
         const supportedCommand = this.commands.find(command => command.supports(message));
         if (!supportedCommand) {
-            console.log('Command is not supported. Returning default command!');
             return this.defaultCommand;
         }
-        console.log('Found a command!');
         return supportedCommand;
     }
 }

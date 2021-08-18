@@ -1,6 +1,7 @@
 import {Client, QueryResult} from "pg";
 import {inject, singleton} from "tsyringe";
 import User from "./user";
+import {User as DiscordUser} from "discord.js";
 
 
 @singleton()
@@ -29,5 +30,9 @@ export default class UserRepository {
         } else {
             return new User(discordUserId);
         }
+    }
+
+    public async getUsers(discordUsers: DiscordUser[]): Promise<User[]> {
+        return await Promise.all(discordUsers.map(discordUser => this.getByDiscordUserId(discordUser.id)));
     }
 }

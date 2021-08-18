@@ -1,4 +1,4 @@
-import {EmbedField} from "discord.js";
+import {EmbedField, MessageEmbed} from "discord.js";
 import Command from "./command";
 
 export default class CommandUtils {
@@ -9,5 +9,9 @@ export default class CommandUtils {
             value: helpDescription,
             inline: false
         };
+    }
+
+    public static getCommandHelpAsMessageEmbed(command: Command): MessageEmbed {
+        return new MessageEmbed().addFields(this.getCommandHelpAsEmbedField(command));
     }
 }

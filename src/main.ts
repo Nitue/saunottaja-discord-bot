@@ -13,6 +13,7 @@ import {Client as PgClient} from "pg";
 import App from "./app";
 import NextPageReaction from "./reactions/next-page-reaction";
 import PreviousPageReaction from "./reactions/previous-page-reaction";
+import SuggestCommand from "./commands/suggest-command";
 
 // Register db client
 const pgClient = new PgClient({
@@ -29,6 +30,7 @@ container.registerInstance("discordClient", discordClient);
 container.register("commands", {
     useValue: [
         container.resolve(LetsPlayCommand),
+        container.resolve(SuggestCommand),
         container.resolve(RegisterSteamIdCommand)
     ]
 });

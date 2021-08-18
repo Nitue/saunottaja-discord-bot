@@ -1,9 +1,10 @@
-import {Message, MessageEmbed} from "discord.js";
+import {Message} from "discord.js";
 import UserRepository from "../users/user-repository";
 import BasicCommand from "./basic-command";
-import CommandUtils from "./command-utils";
 import {singleton} from "tsyringe";
 import {locale} from "../locale/locale-utils";
+import CommandInput from "./commandinput/command-input";
+import CommandUtils from "./command-utils";
 
 @singleton()
 export default class RegisterSteamIdCommand extends BasicCommand {
@@ -14,15 +15,17 @@ export default class RegisterSteamIdCommand extends BasicCommand {
         super();
     }
 
-    async execute(message: Message): Promise<any> {
+    async execute(input: CommandInput): Promise<any> {
+        const message = input.message;
         const steamIdNumber = this.findSteamId(message);
         if (steamIdNumber === undefined) {
-            return message.channel.send(new MessageEmbed().addFields(CommandUtils.getCommandHelpAsEmbedField(this)));
+            return message.channel.send(CommandUtils.getCommandHelpAsMessageEmbed(this));
         }
         try {
             await this.persistSteamId(steamIdNumber, message.author.id);
             return message.react('👍');
         } catch (error) {
+            console.error(error);
             return message.react('👎');
         }
     }

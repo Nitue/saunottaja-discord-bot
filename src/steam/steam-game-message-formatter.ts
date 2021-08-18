@@ -1,13 +1,11 @@
 import {EmbedFieldData, MessageEmbed} from "discord.js";
-import SteamAppUtils from "../../steam/steam-app-utils";
+import SteamAppUtils from "./steam-app-utils";
 import _ from "lodash";
 import {singleton} from "tsyringe";
 
 @singleton()
 export default class SteamGameMessageFormatter {
-    public formatAsDetailedFields(games: SteamGameDetails[], categoryIds: number[], title: string): MessageEmbed[] {
-        const categories = categoryIds.map(id => SteamAppUtils.getCategoryName(id));
-        const footer = categories.join(', ');
+    public formatAsDetailedFields(games: SteamGameDetails[], title: string, footer: string): MessageEmbed[] {
         return _.chunk(games, 25).map((chunk, index, arr) => {
             const page = index + 1;
             return new MessageEmbed()

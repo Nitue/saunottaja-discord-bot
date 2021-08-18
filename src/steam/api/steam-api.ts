@@ -1,6 +1,8 @@
 import settings from '../../settings.json';
 import axios from "axios";
 import {singleton} from "tsyringe";
+import ArrayUtils from "../../common/array-utils";
+import User from "../../users/user";
 
 @singleton()
 export default class SteamApi {
@@ -27,5 +29,12 @@ export default class SteamApi {
             }
         });
         return (result.data[`${appId}`] as SteamAppDetailsResponse).data;
+    }
+
+    public async getMatchingAppIds(users: User[]): Promise<number[]> {
+        const requests = users.map(user => this.getOwnedGames(user.steamId as string)
+            .then(ownedGames => ownedGames.games.map(game => game.appid)));
+        const userAppIdLists = await Promise.all(requests);
+        return ArrayUtils.getMatchingValues(userAppIdLists);
     }
 }

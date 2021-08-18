@@ -1,65 +1,61 @@
-import {Message, MessageEmbed, User as DiscordUser} from "discord.js";
 import SteamApi from "../../steam/api/steam-api";
 import UserRepository from "../../users/user-repository";
 import BasicCommand from "../basic-command";
-import User from "../../users/user";
-import CommandUtils from "../command-utils";
 import LetsPlayUtils from "./lets-play-utils";
-import LetsPlayRandom from "./lets-play-random";
-import LetsPlayList from "./lets-play-list";
-import {locale, LocaleUtils} from "../../locale/locale-utils";
+import {locale} from "../../locale/locale-utils";
 import {singleton} from "tsyringe";
 import MessagePagingService from "../../messages/message-paging-service";
 import MessagePagingUtils from "../../messages/message-paging-utils";
+import SteamAppUtils from "../../steam/steam-app-utils";
+import SteamGameMessageFormatter from "../../steam/steam-game-message-formatter";
+import CommandInput from "../commandinput/command-input";
+import SteamUserCommandInputValidator from "../commandinput/steam-user-command-input-validator";
+import CommandUtils from "../command-utils";
 
 @singleton()
 export default class LetsPlayCommand extends BasicCommand {
 
     constructor(
+        private validator: SteamUserCommandInputValidator,
         private userRepository: UserRepository,
         private steamApi: SteamApi,
-        private letsPlayRandom: LetsPlayRandom,
-        private letsPlayList: LetsPlayList,
-        private messagePagingService: MessagePagingService
+        private messagePagingService: MessagePagingService,
+        private steamGameMessageFormatter: SteamGameMessageFormatter
     ) {
         super();
     }
 
-    async execute(message: Message): Promise<any> {
-        const discordUsers = this.getDiscordUsers(message);
+    async execute(input: CommandInput): Promise<any> {
 
-        // Check that there's enough users
-        if (discordUsers.length < 1) {
-            return message.channel.send(new MessageEmbed().addFields(CommandUtils.getCommandHelpAsEmbedField(this)));
+        // Validate input parameters
+        const validationResult = this.validator.validate(input);
+        if (validationResult.isInvalid) {
+            return input.message.channel.send(validationResult.message ? validationResult.message : CommandUtils.getCommandHelpAsMessageEmbed(this));
         }
+        input.message.react('👍');
 
-        // Tell the user that parameters were fine and actual execution starts
-        await message.react('👍');
+        // Get categories from input
+        const categoryIds = LetsPlayUtils.getCategoryIds(input.message);
 
-        // Get Steam IDs for the users
-        const users = await this.getUsers(discordUsers);
+        // Find out games and their details
+        const appIds = await this.steamApi.getMatchingAppIds(input.users);
+        const appDetailList = await this.getSteamAppDetails(appIds);
+        const unknownGames = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
+        const games = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
 
-        // Check if some user's have not registered their Steam account
-        const notFoundUsers = this.getUsersWithoutSteamId(message, users);
-        if (notFoundUsers.length > 0) {
-            return message.channel.send(LocaleUtils.process(locale.command.letsplay.steam_account_missing, [notFoundUsers.join(', ')]));
-        }
+        // Input and output to messages
+        const unknownGameMessageEmbeds = this.steamGameMessageFormatter.formatAsUrlList(
+            unknownGames,
+            locale.command.letsplay.games_without_info,
+            locale.command.letsplay.you_could_play_these,
+            locale.command.letsplay.games_without_info_detailed
+        );
+        const categoryNames = categoryIds.map(id => SteamAppUtils.getCategoryName(id)).join(', ');
+        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsDetailedFields(games, locale.command.letsplay.you_could_play_these, categoryNames);
+        const messages = gameMessageEmbeds.concat(unknownGameMessageEmbeds);
 
-        // Get list of Steam app IDs each user has
-        const userAppIds = await this.getUserSteamAppIds(users);
-        const matchingAppIds = this.getMatchingAppIds(userAppIds);
-        const categoryIds = LetsPlayUtils.getCategoryIds(message);
-
-        // If 'random', do the 'random' letsplay
-        const isRandomRequested = message.content.includes("random");
-        if (isRandomRequested) {
-            const response = await this.letsPlayRandom.execute(matchingAppIds, categoryIds);
-            return message.channel.send(response);
-        }
-
-        // Otherwise do normal 'list' letsplay
-        const messages = await this.letsPlayList.execute(matchingAppIds, categoryIds);
-        return message.channel.send(messages[0]).then(async (sentMessage) => {
+        // Reply
+        return input.message.channel.send(messages[0]).then(async (sentMessage) => {
             await this.messagePagingService.addPaging(sentMessage.id, messages);
             return MessagePagingUtils.addControls(sentMessage);
         });
@@ -73,36 +69,12 @@ export default class LetsPlayCommand extends BasicCommand {
         return "letsplay";
     }
 
-    private getDiscordUsers(message: Message): DiscordUser[] {
-        return message.mentions.users.filter(user => user.id !== message.client.user?.id).array();
-    }
-
-    private getUsers(discordUsers: DiscordUser[]): Promise<User[]> {
-        return Promise.all(discordUsers.map(discordUser => this.userRepository.getByDiscordUserId(discordUser.id)));
-    }
-
-    private getUserSteamAppIds(steamIds: User[]): Promise<number[][]> {
-        const requests = steamIds.map(steamId => this.steamApi.getOwnedGames(steamId.steamId as string)
-            .then(ownedGames => ownedGames.games.map(game => game.appid))
+    private async getSteamAppDetails(appIds: number[]): Promise<SteamGameDetails[]> {
+        const gameDetails = await Promise.all(appIds.map(appId => this.steamApi.getAppDetails(appId)
             .catch(error => {
-                console.warn('Failed to get owned games', error.message);
-                return [] as number[];
-            }))
-        return Promise.all(requests);
-    }
-
-    private getUsersWithoutSteamId(message: Message, users: User[]): string[]  {
-        const notFoundSteamIds = users.filter(user => !user.steamId);
-        return notFoundSteamIds
-            .map(steamId => message.mentions.users.find(user => user.id === steamId.discordUserId))
-            .map(user => user?.username)
-            .filter(username => !!username)
-            .map(username => username as string);
-    }
-
-    private getMatchingAppIds(userAppIds: number[][]): number[]  {
-        return userAppIds.reduce((previousAppIds, nextAppIds) => {
-            return previousAppIds.filter(x => nextAppIds.includes(x));
-        });
+                console.warn('Failed to get app details:', error.message);
+                return SteamAppUtils.getErrorGameDetails(error.config.params.appids);
+            })));
+        return gameDetails.filter(details => !!details);
     }
 }
