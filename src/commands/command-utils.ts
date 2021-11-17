@@ -1,5 +1,6 @@
 import {EmbedField, MessageEmbed} from "discord.js";
 import Command from "./command";
+import {SlashCommandBuilder} from "@discordjs/builders";
 
 export default class CommandUtils {
     public static getCommandHelpAsEmbedField(command: Command): EmbedField {

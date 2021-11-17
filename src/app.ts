@@ -1,4 +1,11 @@
-import {Client as DiscordClient, Message, MessageReaction} from "discord.js";
+import {
+    CacheType,
+    Client as DiscordClient,
+    CommandInteraction,
+    Interaction,
+    Message,
+    MessageReaction
+} from "discord.js";
 import migrate from "./db/migration";
 import CommandService from "./commands/command-service";
 import {Client as PgClient} from "pg";
@@ -6,6 +13,8 @@ import {inject, singleton} from "tsyringe";
 import ReactionService from "./reactions/reaction-service";
 import {ReactionEvent} from "./reactions/reaction-event";
 import CommandInputFactory from "./commands/commandinput/command-input-factory";
+import Command from "./commands/command";
+import {REST} from "@discordjs/rest";
 
 @singleton()
 export default class App {
@@ -15,10 +24,11 @@ export default class App {
         private commandInputService: CommandInputFactory,
         private reactionService: ReactionService,
         @inject("pgClient") private pgClient: PgClient,
-        @inject("discordClient") private discordClient: DiscordClient
+        @inject("discordClient") private discordClient: DiscordClient,
+        @inject("commands") private readonly commands: Command[]
     ) {}
 
-    public run() {
+    public async run() {
         this.pgClient.connect()
             .then(() => migrate(this.pgClient))
             .catch(error => {
@@ -26,37 +36,29 @@ export default class App {
                 process.exit(-1);
             });
 
+        await this.commandService.registerCommands(this.commands);
+
         this.discordClient.on("ready", () => {
             console.log(`Ready as ${this.discordClient.user?.tag}`);
         });
-        this.discordClient.on("message", (message) => this.handleMessage(message));
+        this.discordClient.on("interactionCreate", (interaction) => this.handleInteraction(interaction));
         this.discordClient.on("messageReactionAdd", this.createReactionListener(ReactionEvent.messageReactionAdd));
         this.discordClient.on("messageReactionRemove", this.createReactionListener(ReactionEvent.messageReactionRemove));
-        this.discordClient.login(process.env.DISCORD_BOT_TOKEN);
+        this.discordClient.login(process.env.DISCORD_BOT_TOKEN).then(() => console.log("Bot logged in"));
     }
 
-    private async handleMessage(message: Message) {
-        // Ignore own messages
-        const isSelf = message.author.id === this.discordClient.user?.id;
-        if (isSelf) {
-            return undefined;
+    private async handleInteraction(interaction: Interaction) {
+        if (!interaction.isCommand()) {
+            return;
         }
 
-        // Bot must be mentioned or DM'd
-        const botMentioned = message.mentions.users.find(user => user.id === this.discordClient.user?.id) !== undefined;
-        const isDirectMessage = message.channel.type === "dm";
-        if (!botMentioned && !isDirectMessage) {
-            return undefined;
-        }
-
-        const command = this.commandService.findCommand(message);
+        const command = this.commandService.findCommand(interaction);
         if (!command) return;
 
         const commandName = command.constructor.name;
         console.log(`Executing command: ${commandName}`);
 
-        const commandInput = await this.commandInputService.create(message);
-        await command.execute(commandInput);
+        await command.execute(interaction);
         console.log(`Command execution finished: ${commandName}`)
     }
 

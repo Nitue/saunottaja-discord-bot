@@ -13,9 +13,9 @@
       "you_could_play_these": "You could play these games"
     },
     "steamid": {
-      "help": {
-        "command": "steamid <your-steam-id>",
-        "description": "Register your Steam ID for the bot. Your Steam ID is a number sequence."
+      "description": "Register your Steam ID for the bot. ",
+      "args": {
+        "id": "Your Steam ID is a number sequence."
       }
     },
     "help": {

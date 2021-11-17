@@ -1,21 +1,30 @@
 import Command from "./command";
-import {Message} from "discord.js";
+import {Collection, CommandInteraction} from "discord.js";
 import {inject, singleton} from "tsyringe";
+import {REST} from "@discordjs/rest";
+import {Routes} from "discord-api-types";
 
 @singleton()
 export default class CommandService {
 
+    private commands = new Collection<string, Command>();
+
     constructor(
-        @inject("commands") private readonly commands: Command[],
-        @inject("defaultCommand") private readonly defaultCommand: Command
+        @inject("discordRest") private readonly discordRestApi: REST
     ) {}
 
-    public findCommand(message: Message): Command | undefined {
-        const supportedCommand = this.commands.find(command => command.supports(message));
-        if (!supportedCommand) {
-            console.log("Returning default command...")
-            return this.defaultCommand;
-        }
-        return supportedCommand;
+    public findCommand(interaction: CommandInteraction): Command | undefined {
+        return this.commands.get(interaction.commandName);
+    }
+
+    public async registerCommands(commands: Command[]) {
+        console.log("Started registering slash commands...");
+        const commandDatas = this.commands.map(command => {
+            const data = command.getSlashCommand().toJSON();
+            this.commands.set(data.name, command);
+            return data;
+        });
+        await this.discordRestApi.put(Routes.applicationCommands(process.env.DISCORD_APP_ID), {body: commandDatas});
+        console.log("Registered slash commands successfully!");
     }
 }

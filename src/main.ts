@@ -4,7 +4,7 @@ import "reflect-metadata";
 import dotenv from "dotenv";
 dotenv.config();
 
-import {Client as DiscordClient} from "discord.js";
+import {Client as DiscordClient, Intents} from "discord.js";
 import HelpCommand from "./commands/help-command";
 import {container} from "tsyringe";
 import LetsPlayCommand from "./commands/letsplay/lets-play-command";
@@ -15,6 +15,7 @@ import NextPageReaction from "./reactions/next-page-reaction";
 import PreviousPageReaction from "./reactions/previous-page-reaction";
 import SuggestCommand from "./commands/suggest-command";
 import LetsBuyCommand from "./commands/lets-buy-command";
+import {REST} from "@discordjs/rest";
 
 // Register db client
 const pgClient = new PgClient({
@@ -24,8 +25,12 @@ const pgClient = new PgClient({
 container.registerInstance("pgClient", pgClient);
 
 // Register discord client
-const discordClient = new DiscordClient({partials: ["REACTION"]});
+const discordClient = new DiscordClient({intents: [Intents.FLAGS.GUILDS]});
 container.registerInstance("discordClient", discordClient);
+
+// Register discord REST API
+const rest = new REST({version: '9'}).setToken(process.env.DISCORD_BOT_TOKEN);
+container.registerInstance("discordRest", rest);
 
 // Register commands
 container.register("commands", {
@@ -62,4 +67,4 @@ process.on("exit", () => process.stdout.write('Good bye\n\n'));
 
 // Start the application
 const app = container.resolve(App);
-app.run();
+app.run().then(() => console.log("Application started"))
