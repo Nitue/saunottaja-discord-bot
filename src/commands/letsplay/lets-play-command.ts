@@ -28,7 +28,7 @@ export default class LetsPlayCommand extends BasicCommand {
     async execute(input: CommandInput): Promise<any> {
 
         // Validate input parameters
-        const validationResult = this.validator.validate(input);
+        const validationResult = this.validator.validate(input, 2);
         if (validationResult.isInvalid) {
             return input.message.channel.send(validationResult.message ? validationResult.message : CommandUtils.getCommandHelpAsMessageEmbed(this));
         }
@@ -39,7 +39,7 @@ export default class LetsPlayCommand extends BasicCommand {
 
         // Find out games and their details
         const appIds = await this.steamApi.getMatchingAppIds(input.users);
-        const appDetailList = await this.getSteamAppDetails(appIds);
+        const appDetailList = await this.steamApi.getManyAppDetails(appIds);
         const unknownGames = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
         const games = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
 
@@ -67,14 +67,5 @@ export default class LetsPlayCommand extends BasicCommand {
 
     getKeyword(): string {
         return "letsplay";
-    }
-
-    private async getSteamAppDetails(appIds: number[]): Promise<SteamGameDetails[]> {
-        const gameDetails = await Promise.all(appIds.map(appId => this.steamApi.getAppDetails(appId)
-            .catch(error => {
-                console.warn('Failed to get app details:', error.message);
-                return SteamAppUtils.getErrorGameDetails(error.config.params.appids);
-            })));
-        return gameDetails.filter(details => !!details);
     }
 }

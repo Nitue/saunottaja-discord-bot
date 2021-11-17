@@ -3,6 +3,7 @@ import axios from "axios";
 import {singleton} from "tsyringe";
 import ArrayUtils from "../../common/array-utils";
 import User from "../../users/user";
+import SteamAppUtils from "../steam-app-utils";
 
 @singleton()
 export default class SteamApi {
@@ -31,10 +32,23 @@ export default class SteamApi {
         return (result.data[`${appId}`] as SteamAppDetailsResponse).data;
     }
 
-    public async getMatchingAppIds(users: User[]): Promise<number[]> {
+    public async getManyAppDetails(appIds: number[]): Promise<SteamGameDetails[]> {
+        const gameDetails = await Promise.all(appIds.map(appId => this.getAppDetails(appId)
+            .catch(error => {
+                console.warn('Failed to get app details:', error.message);
+                return SteamAppUtils.getErrorGameDetails(error.config.params.appids);
+            })));
+        return gameDetails.filter(details => !!details);
+    }
+
+    public async getUsersAppIdLists(users: User[]): Promise<number[][]> {
         const requests = users.map(user => this.getOwnedGames(user.steamId as string)
             .then(ownedGames => ownedGames.games.map(game => game.appid)));
-        const userAppIdLists = await Promise.all(requests);
+        return await Promise.all(requests);
+    }
+
+    public async getMatchingAppIds(users: User[]): Promise<number[]> {
+        const userAppIdLists = await this.getUsersAppIdLists(users);
         return ArrayUtils.getMatchingValues(userAppIdLists);
     }
 }

@@ -26,7 +26,7 @@ export default class SuggestCommand extends BasicCommand {
     async execute(input: CommandInput): Promise<any> {
 
         // Validate input parameters
-        const validationResult = this.validator.validate(input);
+        const validationResult = this.validator.validate(input, 2);
         if (validationResult.isInvalid) {
             return input.message.channel.send(validationResult.message ? validationResult.message : CommandUtils.getCommandHelpAsMessageEmbed(this));
         }

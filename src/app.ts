@@ -6,7 +6,6 @@ import {inject, singleton} from "tsyringe";
 import ReactionService from "./reactions/reaction-service";
 import {ReactionEvent} from "./reactions/reaction-event";
 import CommandInputFactory from "./commands/commandinput/command-input-factory";
-import CommandUtils from "./commands/command-utils";
 
 @singleton()
 export default class App {
@@ -37,6 +36,19 @@ export default class App {
     }
 
     private async handleMessage(message: Message) {
+        // Ignore own messages
+        const isSelf = message.author.id === this.discordClient.user?.id;
+        if (isSelf) {
+            return undefined;
+        }
+
+        // Bot must be mentioned or DM'd
+        const botMentioned = message.mentions.users.find(user => user.id === this.discordClient.user?.id) !== undefined;
+        const isDirectMessage = message.channel.type === "dm";
+        if (!botMentioned && !isDirectMessage) {
+            return undefined;
+        }
+
         const command = this.commandService.findCommand(message);
         if (!command) return;
 

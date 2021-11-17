@@ -29,6 +29,13 @@
       },
       "how_about": "How about...",
       "random_death_switch": "Well, it seems I didn't find a game fast enough. Sorry about that. Could you try again?"
+    },
+    "letsbuy": {
+      "help": {
+        "command": "letsbuy <@You> <@Friend> ... <@AnotherFriend>",
+        "description": "Shows what games you could almost play together."
+      },
+      "buy_these": "Some of you could buy these to play something new together!"
     }
   }
 }

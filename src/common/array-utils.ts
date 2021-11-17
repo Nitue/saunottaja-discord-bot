@@ -1,4 +1,5 @@
 import uniqueRandom from "unique-random";
+import _ from "lodash";
 
 export default class ArrayUtils {
     public static getRandomValue<T>(values: T[]): T {
@@ -10,5 +11,9 @@ export default class ArrayUtils {
         return arrays.reduce((previousArray, nextArray) => {
             return previousArray.filter(x => nextArray.includes(x));
         });
+    }
+
+    public static getOccurrences<T>(arrays: T[][]): _.Dictionary<number> {
+        return _.countBy(_.flatten(arrays));
     }
 }

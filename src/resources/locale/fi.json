@@ -29,6 +29,13 @@
       },
       "random_death_switch": "Nyt kävi vähän niin, etten löytänyt riittävän nopeasti peliä, joka olisi sopinut hakukriteereihin. Kokeileppa uudelleen...",
       "how_about": "Miten olisi vaikkapa..."
+    },
+    "letsbuy": {
+      "help": {
+        "command": "letsbuy <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>",
+        "description": "Kertoo mitä pelejä voisitte melkein pelata."
+      },
+      "buy_these": "Osalla teistä on jo nämä pelit. Osalla taas ei."
     }
   }
 }

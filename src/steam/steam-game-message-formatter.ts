@@ -5,7 +5,7 @@ import {singleton} from "tsyringe";
 
 @singleton()
 export default class SteamGameMessageFormatter {
-    public formatAsDetailedFields(games: SteamGameDetails[], title: string, footer: string): MessageEmbed[] {
+    public formatAsDetailedFields(games: SteamGameDetails[], title: string, footer?: string): MessageEmbed[] {
         return _.chunk(games, 25).map((chunk, index, arr) => {
             const page = index + 1;
             return new MessageEmbed()
