@@ -1,5 +1,4 @@
-import {MessageReaction, PartialMessageReaction} from "discord.js";
-import {ReactionEvent} from "./reaction-event";
+import {MessageReaction} from "discord.js";
 
 export default interface Reaction {
     execute(messageReaction: MessageReaction): Promise<any>;
