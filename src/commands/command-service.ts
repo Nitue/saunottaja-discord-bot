@@ -25,7 +25,7 @@ export default class CommandService {
             this.commands.set(data.name, command);
             return data;
         });
-        await this.discordRestApi.put(Routes.applicationCommands(process.env.DISCORD_APP_ID as string), {body: commandDatas});
+        await this.discordRestApi.put(Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID as string), {body: commandDatas});
         console.log("Registered slash commands successfully!");
     }
 }
