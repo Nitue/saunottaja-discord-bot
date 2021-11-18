@@ -1,24 +1,25 @@
-import SteamApi from "../../steam/api/steam-api";
-import UserRepository from "../../users/user-repository";
-import LetsPlayUtils from "./lets-play-utils";
-import {locale} from "../../locale/locale-utils";
+import SteamApi from "../steam/api/steam-api";
+import UserRepository from "../users/user-repository";
+import {locale} from "../locale/locale-utils";
 import {singleton} from "tsyringe";
-import MessagePagingService from "../../messages/message-paging-service";
-import MessagePagingUtils from "../../messages/message-paging-utils";
-import SteamAppUtils from "../../steam/steam-app-utils";
-import SteamGameMessageFormatter from "../../steam/steam-game-message-formatter";
-import Command from "../command";
-import {CommandInteraction, Message, MessagePayload, User} from "discord.js";
+import MessagePagingService from "../messages/message-paging-service";
+import MessagePagingUtils from "../messages/message-paging-utils";
+import SteamAppUtils from "../steam/steam-app-utils";
+import SteamGameMessageFormatter from "../steam/steam-game-message-formatter";
+import Command from "./command";
+import {CommandInteraction, Message, MessagePayload} from "discord.js";
 import {SlashCommandBuilder} from "@discordjs/builders";
+import CategoryUtils from "../common/category-utils";
+import InteractionUtils from "../common/interaction-utils";
 
 @singleton()
 export default class LetsPlayCommand implements Command {
 
-    private ARG_CATEGORY = "Category";
-    private ARG_USER1 = "User 1";
-    private ARG_USER2 = "User 2";
-    private ARG_USER3 = "User 3";
-    private ARG_USER4 = "User 4";
+    private ARG_CATEGORY = "category";
+    private ARG_USER1 = "user1";
+    private ARG_USER2 = "user2";
+    private ARG_USER3 = "user3";
+    private ARG_USER4 = "user4";
     private ARG_USERS = [this.ARG_USER1, this.ARG_USER2, this.ARG_USER3, this.ARG_USER4];
 
     constructor(
@@ -31,11 +32,11 @@ export default class LetsPlayCommand implements Command {
     async execute(interaction: CommandInteraction): Promise<any> {
 
         const message = await interaction.deferReply({fetchReply: true}) as Message;
-        const discordUsers = this.ARG_USERS.map(arg => interaction.options.getUser(arg)).filter(this.isUser);
+        const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
 
         // Get categories from input
-        const categoryIds = LetsPlayUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY) as string | undefined);
+        const categoryIds = CategoryUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY));
 
         // Find out games and their details
         const appIds = await this.steamApi.getMatchingAppIds(users);
@@ -75,9 +76,5 @@ export default class LetsPlayCommand implements Command {
                 .addChoice("Co-Op", "coop")
                 .addChoice("MMO", "mmo"))
             .setDescription(locale.command.letsplay.description);
-    }
-
-    private isUser(user: User | null): user is User {
-        return !!user;
     }
 }

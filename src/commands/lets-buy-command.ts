@@ -9,9 +9,10 @@ import MessagePagingService from "../messages/message-paging-service";
 import {singleton} from "tsyringe";
 import SteamAppUtils from "../steam/steam-app-utils";
 import Command from "./command";
-import {CommandInteraction, Message, MessagePayload, User} from "discord.js";
+import {CommandInteraction, Message, MessagePayload} from "discord.js";
 import {SlashCommandBuilder} from "@discordjs/builders";
-import LetsPlayUtils from "./letsplay/lets-play-utils";
+import CategoryUtils from "../common/category-utils";
+import InteractionUtils from "../common/interaction-utils";
 
 @singleton()
 export default class LetsBuyCommand implements Command{
@@ -32,16 +33,17 @@ export default class LetsBuyCommand implements Command{
 
     async execute(interaction: CommandInteraction): Promise<any> {
         const message = await interaction.deferReply({fetchReply: true}) as Message;
-        const discordUsers = this.ARG_USERS.map(arg => interaction.options.getUser(arg)).filter(this.isUser);
+        const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
 
         const usersAppIdLists = await this.steamApi.getUsersAppIdLists(users);
         const appIdOccurrences = ArrayUtils.getOccurrences(usersAppIdLists);
-        const requiredOccurrences = Math.ceil(users.length / 2);
+        const requiredOccurrences = users.length - 1;
         const appIds = _.keys(_.pickBy(appIdOccurrences, occurrenceCount => occurrenceCount >= requiredOccurrences && occurrenceCount < users.length))
             .map(appId => Number(appId));
         const allGames = await this.steamApi.getManyAppDetails(appIds);
-        const games = allGames.filter(game => SteamAppUtils.isGameInCategory(game, LetsPlayUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY) as string | undefined)));
+        const categoryIds = CategoryUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY));
+        const games = allGames.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
 
         const messages = this.steamGameMessageFormatter.formatAsMessageEmbeds(games, locale.command.letsbuy.reply.buy_these);
 
@@ -55,21 +57,17 @@ export default class LetsBuyCommand implements Command{
     getSlashCommand(): SlashCommandBuilder {
         return new SlashCommandBuilder()
             .setName("letsbuy")
-            .addUserOption(option => option.setName(this.ARG_USER1).setDescription(locale.command.suggest.args.user).setRequired(true))
-            .addUserOption(option => option.setName(this.ARG_USER2).setDescription(locale.command.suggest.args.user).setRequired(true))
-            .addUserOption(option => option.setName(this.ARG_USER3).setDescription(locale.command.suggest.args.user))
-            .addUserOption(option => option.setName(this.ARG_USER4).setDescription(locale.command.suggest.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER1).setDescription(locale.command.letsbuy.args.user).setRequired(true))
+            .addUserOption(option => option.setName(this.ARG_USER2).setDescription(locale.command.letsbuy.args.user).setRequired(true))
+            .addUserOption(option => option.setName(this.ARG_USER3).setDescription(locale.command.letsbuy.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER4).setDescription(locale.command.letsbuy.args.user))
             .addStringOption(option => option
                 .setName(this.ARG_CATEGORY)
-                .setDescription(locale.command.suggest.args.category)
+                .setDescription(locale.command.letsbuy.args.category)
                 .addChoice("All", "default")
                 .addChoice("Co-Op", "coop")
                 .addChoice("MMO", "mmo"))
-            .setDescription(locale.command.suggest.description);
-    }
-
-    private isUser(user: User | null): user is User {
-        return !!user;
+            .setDescription(locale.command.letsbuy.description);
     }
 
 }

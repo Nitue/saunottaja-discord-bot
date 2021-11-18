@@ -3,12 +3,13 @@ import ArrayUtils from "../common/array-utils";
 import SteamAppUtils from "../steam/steam-app-utils";
 import SteamApi from "../steam/api/steam-api";
 import SteamGameMessageFormatter from "../steam/steam-game-message-formatter";
-import LetsPlayUtils from "./letsplay/lets-play-utils";
 import UserRepository from "../users/user-repository";
 import {singleton} from "tsyringe";
 import Command from "./command";
 import {SlashCommandBuilder} from "@discordjs/builders";
-import {CommandInteraction, MessagePayload, User} from "discord.js";
+import {CommandInteraction, MessagePayload} from "discord.js";
+import CategoryUtils from "../common/category-utils";
+import InteractionUtils from "../common/interaction-utils";
 
 @singleton()
 export default class SuggestCommand implements Command {
@@ -27,10 +28,10 @@ export default class SuggestCommand implements Command {
     ) {}
 
     async execute(interaction: CommandInteraction): Promise<any> {
-        const discordUsers = this.ARG_USERS.map(arg => interaction.options.getUser(arg)).filter(this.isUser);
+        const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
         const appIds = await this.steamApi.getMatchingAppIds(users);
-        const categoryIds = LetsPlayUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY) as string | undefined);
+        const categoryIds = CategoryUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY));
 
         await interaction.deferReply();
 
@@ -70,9 +71,5 @@ export default class SuggestCommand implements Command {
         }
         console.log(`Killswitched after ${killSwitchCounter} tries!`);
         return undefined;
-    }
-
-    private isUser(user: User | null): user is User {
-        return !!user;
     }
 }

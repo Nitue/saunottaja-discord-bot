@@ -8,11 +8,18 @@
   "discord": {
     "apiUrl": "https://discord.com/api"
   },
-  "letsplay": {
-    "categories": {
-      "default": [1, 9, 20, 36],
-      "coop": [9],
-      "mmo": [20]
+  "categories": {
+    "default": {
+      "name": "All",
+      "categoryIds": [1, 9, 20, 36]
+    },
+    "coop": {
+      "name": "Co-op",
+      "categoryIds": [9]
+    },
+    "mmo": {
+      "name": "MMO",
+      "categoryIds": [20]
     }
   },
   "steam": {

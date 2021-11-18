@@ -7,7 +7,7 @@ dotenv.config();
 import {REST} from "@discordjs/rest";
 import {Client as DiscordClient, Intents} from "discord.js";
 import {container} from "tsyringe";
-import LetsPlayCommand from "./commands/letsplay/lets-play-command";
+import LetsPlayCommand from "./commands/lets-play-command";
 import RegisterSteamIdCommand from "./commands/register-steam-id-command";
 import {Client as PgClient} from "pg";
 import App from "./app";
