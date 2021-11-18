@@ -14,10 +14,10 @@ export default class MessagePagingService {
     ) {
     }
 
-    public async addPaging(discordMessageId: string, messages: MessageEmbed[]): Promise<any> {
-        await this.messagePagePositionRepository.save(new MessagePagePosition(discordMessageId, 0));
+    public async addPaging(discordMessage: Message, messages: MessageEmbed[]): Promise<any> {
+        await this.messagePagePositionRepository.save(new MessagePagePosition(discordMessage.id, 0));
         return Promise.all(messages
-            .map((message, index) => new MessagePage(discordMessageId, index, message))
+            .map((message, index) => new MessagePage(discordMessage.id, index, message))
             .map(page => this.messagePageRepository.save(page)));
     }
 

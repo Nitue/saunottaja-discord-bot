@@ -24,12 +24,20 @@ const pgClient = new PgClient({
 container.registerInstance("pgClient", pgClient);
 
 // Register discord client
-const discordClient = new DiscordClient({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ["REACTION", "MESSAGE", "CHANNEL"] });
+const discordClient = new DiscordClient({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
 container.registerInstance("discordClient", discordClient);
 
 // Register discord REST API
 const rest = new REST({version: '9'}).setToken(process.env.DISCORD_BOT_TOKEN as string);
 container.registerInstance("discordRest", rest);
+
+// Register reactions
+container.register("reactions", {
+    useValue: [
+        container.resolve(NextPageReaction),
+        container.resolve(PreviousPageReaction)
+    ]
+});
 
 // Register commands
 container.register("commands", {
@@ -38,14 +46,6 @@ container.register("commands", {
         container.resolve(LetsBuyCommand),
         container.resolve(SuggestCommand),
         container.resolve(RegisterSteamIdCommand)
-    ]
-});
-
-// Register reactions
-container.register("reactions", {
-    useValue: [
-        container.resolve(NextPageReaction),
-        container.resolve(PreviousPageReaction)
     ]
 });
 

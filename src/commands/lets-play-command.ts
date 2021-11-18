@@ -7,10 +7,11 @@ import MessagePagingUtils from "../messages/message-paging-utils";
 import SteamAppUtils from "../steam/steam-app-utils";
 import SteamGameMessageFormatter from "../steam/steam-game-message-formatter";
 import Command from "./command";
-import {CommandInteraction, Message, MessagePayload} from "discord.js";
+import {CommandInteraction, Message} from "discord.js";
 import {SlashCommandBuilder} from "@discordjs/builders";
 import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
+import ReactionService from "../reactions/reaction-service";
 
 @singleton()
 export default class LetsPlayCommand implements Command {
@@ -26,7 +27,8 @@ export default class LetsPlayCommand implements Command {
         private userRepository: UserRepository,
         private steamApi: SteamApi,
         private messagePagingService: MessagePagingService,
-        private steamGameMessageFormatter: SteamGameMessageFormatter
+        private steamGameMessageFormatter: SteamGameMessageFormatter,
+        private reactionService: ReactionService
     ) {}
 
     async execute(interaction: CommandInteraction): Promise<any> {
@@ -56,9 +58,10 @@ export default class LetsPlayCommand implements Command {
         const messages = gameMessageEmbeds.concat(unknownGameMessageEmbeds);
 
         // Reply
-        return interaction.editReply(MessagePayload.create(interaction, {embeds: [messages[0]]})).then(async (sentMessage) => {
-            await this.messagePagingService.addPaging(sentMessage.id, messages);
-            return MessagePagingUtils.addControls(message);
+        return InteractionUtils.editReplyEmbeds(interaction, [messages[0]]).then(async () => {
+            await this.messagePagingService.addPaging(message, messages);
+            await MessagePagingUtils.addControls(message);
+            this.reactionService.listenReactions(message);
         });
     }
 

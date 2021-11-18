@@ -1,7 +1,6 @@
 import Reaction from "./reaction";
 import {MessageReaction} from "discord.js";
 import {singleton} from "tsyringe";
-import {ReactionEvent} from "./reaction-event";
 import MessagePagingService from "../messages/message-paging-service";
 
 @singleton()
@@ -15,7 +14,7 @@ export default class PreviousPageReaction implements Reaction {
         return this.messagePagingService.moveToPage(messageReaction, -1);
     }
 
-    supports(messageReaction: MessageReaction, reactionEvent: ReactionEvent): boolean {
+    supports(messageReaction: MessageReaction): boolean {
         return messageReaction.emoji.name === "◀️";
     }
 

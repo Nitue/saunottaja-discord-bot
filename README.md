@@ -32,7 +32,7 @@ Instructions in "Prerequisites" are needed for running the bot and development.
 ## Prerequisites
 
 1. Create an application on the [Discord Developer Portal](https://discord.com/developers/applications) and add a bot to your application. Take a note of your bot token and application id.
-2. Invite your bot to your server: `https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&permissions=2112&scope=bot%20applications.commands` where `YOUR_APPLICATION_ID` is replaced with your actual application id.
+2. Invite your bot to your server: `https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&permissions=10304&scope=bot%20applications.commands` where `YOUR_APPLICATION_ID` is replaced with your actual application id.
 3. Get your [Steam API key](https://steamcommunity.com/dev/apikey).
 
 > Note: API keys and tokens are private information, and you should never share these with anyone.
