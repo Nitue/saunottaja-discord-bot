@@ -41,8 +41,8 @@ export default class MessagePagingService {
 
         // Update current index and edit message
         await this.messagePagePositionRepository.save(messagePagePosition);
-        const message = await messageReaction.message.edit("", {
-            embed: messagePage.pageContent
+        const message = await messageReaction.message.edit({
+            embeds: [messagePage.pageContent]
         });
         console.log('Page loaded');
         return message;

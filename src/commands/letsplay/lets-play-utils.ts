@@ -2,9 +2,8 @@ import {Message} from "discord.js";
 import settings from "../../settings.json";
 
 export default class LetsPlayUtils {
-    public static getCategoryIds(message: Message): number[] {
-        const categoryGroup = LetsPlayUtils.getCategoryGroup(message);
-        return (settings.letsplay.categories as any)[categoryGroup];
+    public static getCategoryIds(category: string = "default"): number[] {
+        return (settings.letsplay.categories as any)[category];
     }
 
     public static getCategoryGroup(message: Message): string {

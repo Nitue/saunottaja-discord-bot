@@ -15,7 +15,7 @@ export default class RegisterSteamIdCommand implements Command {
     ) {}
 
     async execute(interaction: CommandInteraction): Promise<any> {
-        const steamId = interaction.options.get(this.ARG_ID, true)?.value as number;
+        const steamId = interaction.options.getString(this.ARG_ID, true);
         try {
             await this.persistSteamId(steamId, interaction.user.id);
             return interaction.reply({content: "Done! You can now use other commands.", ephemeral: true});
@@ -28,13 +28,13 @@ export default class RegisterSteamIdCommand implements Command {
     getSlashCommand(): SlashCommandBuilder {
         return new SlashCommandBuilder()
             .setName("steamid")
-            .addIntegerOption(option => option.setName(this.ARG_ID).setDescription(locale.command.steamid.args.id).setRequired(true))
+            .addStringOption(option => option.setName(this.ARG_ID).setDescription(locale.command.steamid.args.id).setRequired(true))
             .setDescription(locale.command.steamid.description);
     }
 
-    private async persistSteamId(steamIdNumber: number, discordUserId: string): Promise<any> {
+    private async persistSteamId(steamIdNumber: string, discordUserId: string): Promise<any> {
         const steamId = await this.steamIdRepository.getByDiscordUserId(discordUserId);
-        steamId.steamId = steamIdNumber as string;
+        steamId.steamId = String(steamIdNumber);
         return this.steamIdRepository.save(steamId);
     }
 }

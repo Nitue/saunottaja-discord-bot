@@ -4,8 +4,8 @@ import "reflect-metadata";
 import dotenv from "dotenv";
 dotenv.config();
 
+import {REST} from "@discordjs/rest";
 import {Client as DiscordClient, Intents} from "discord.js";
-import HelpCommand from "./commands/help-command";
 import {container} from "tsyringe";
 import LetsPlayCommand from "./commands/letsplay/lets-play-command";
 import RegisterSteamIdCommand from "./commands/register-steam-id-command";
@@ -15,7 +15,6 @@ import NextPageReaction from "./reactions/next-page-reaction";
 import PreviousPageReaction from "./reactions/previous-page-reaction";
 import SuggestCommand from "./commands/suggest-command";
 import LetsBuyCommand from "./commands/lets-buy-command";
-import {REST} from "@discordjs/rest";
 
 // Register db client
 const pgClient = new PgClient({
@@ -25,11 +24,11 @@ const pgClient = new PgClient({
 container.registerInstance("pgClient", pgClient);
 
 // Register discord client
-const discordClient = new DiscordClient({intents: [Intents.FLAGS.GUILDS]});
+const discordClient = new DiscordClient({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ["REACTION", "MESSAGE", "CHANNEL"] });
 container.registerInstance("discordClient", discordClient);
 
 // Register discord REST API
-const rest = new REST({version: '9'}).setToken(process.env.DISCORD_BOT_TOKEN);
+const rest = new REST({version: '9'}).setToken(process.env.DISCORD_BOT_TOKEN as string);
 container.registerInstance("discordRest", rest);
 
 // Register commands
@@ -41,7 +40,6 @@ container.register("commands", {
         container.resolve(RegisterSteamIdCommand)
     ]
 });
-container.registerInstance("defaultCommand", container.resolve(HelpCommand));
 
 // Register reactions
 container.register("reactions", {

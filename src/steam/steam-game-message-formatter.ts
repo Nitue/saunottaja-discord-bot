@@ -8,11 +8,14 @@ export default class SteamGameMessageFormatter {
     public formatAsDetailedFields(games: SteamGameDetails[], title: string, footer?: string): MessageEmbed[] {
         return _.chunk(games, 25).map((chunk, index, arr) => {
             const page = index + 1;
-            return new MessageEmbed()
+            let embed = new MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${title} ${page}/${arr.length}`)
-                .addFields(this.getGamesAsEmbedFieldList(chunk, index * 25))
-                .setFooter(footer);
+                .addFields(this.getGamesAsEmbedFieldList(chunk, index * 25));
+            if (footer) {
+                embed = embed.setFooter(footer);
+            }
+            return embed;
         })
     }
 

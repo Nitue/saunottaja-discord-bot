@@ -1,27 +1,17 @@
-import {
-    CacheType,
-    Client as DiscordClient,
-    CommandInteraction,
-    Interaction,
-    Message,
-    MessageReaction
-} from "discord.js";
+import {Client as DiscordClient, Interaction, MessageReaction, PartialMessageReaction} from "discord.js";
 import migrate from "./db/migration";
 import CommandService from "./commands/command-service";
 import {Client as PgClient} from "pg";
 import {inject, singleton} from "tsyringe";
 import ReactionService from "./reactions/reaction-service";
 import {ReactionEvent} from "./reactions/reaction-event";
-import CommandInputFactory from "./commands/commandinput/command-input-factory";
 import Command from "./commands/command";
-import {REST} from "@discordjs/rest";
 
 @singleton()
 export default class App {
 
     constructor(
         private commandService: CommandService,
-        private commandInputService: CommandInputFactory,
         private reactionService: ReactionService,
         @inject("pgClient") private pgClient: PgClient,
         @inject("discordClient") private discordClient: DiscordClient,
@@ -63,7 +53,7 @@ export default class App {
     }
 
     private createReactionListener(reactionEvent: ReactionEvent) {
-        return (messageReaction: MessageReaction) => {
+        return (messageReaction: MessageReaction | PartialMessageReaction) => {
             const reaction = this.reactionService.findReaction(messageReaction, reactionEvent);
             if (reaction) {
                 const reactionName = reaction.constructor.name;

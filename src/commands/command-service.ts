@@ -1,8 +1,9 @@
 import Command from "./command";
 import {Collection, CommandInteraction} from "discord.js";
 import {inject, singleton} from "tsyringe";
+
 import {REST} from "@discordjs/rest";
-import {Routes} from "discord-api-types";
+import {Routes} from "discord-api-types/v9";
 
 @singleton()
 export default class CommandService {
@@ -19,12 +20,12 @@ export default class CommandService {
 
     public async registerCommands(commands: Command[]) {
         console.log("Started registering slash commands...");
-        const commandDatas = this.commands.map(command => {
+        const commandDatas = commands.map(command => {
             const data = command.getSlashCommand().toJSON();
             this.commands.set(data.name, command);
             return data;
         });
-        await this.discordRestApi.put(Routes.applicationCommands(process.env.DISCORD_APP_ID), {body: commandDatas});
+        await this.discordRestApi.put(Routes.applicationCommands(process.env.DISCORD_APP_ID as string), {body: commandDatas});
         console.log("Registered slash commands successfully!");
     }
 }

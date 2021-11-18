@@ -1,6 +1,5 @@
 import SteamApi from "../../steam/api/steam-api";
 import UserRepository from "../../users/user-repository";
-import BasicCommand from "../basic-command";
 import LetsPlayUtils from "./lets-play-utils";
 import {locale} from "../../locale/locale-utils";
 import {singleton} from "tsyringe";
@@ -8,37 +7,38 @@ import MessagePagingService from "../../messages/message-paging-service";
 import MessagePagingUtils from "../../messages/message-paging-utils";
 import SteamAppUtils from "../../steam/steam-app-utils";
 import SteamGameMessageFormatter from "../../steam/steam-game-message-formatter";
-import CommandInput from "../commandinput/command-input";
-import SteamUserCommandInputValidator from "../commandinput/steam-user-command-input-validator";
-import CommandUtils from "../command-utils";
+import Command from "../command";
+import {CommandInteraction, Message, MessagePayload, User} from "discord.js";
+import {SlashCommandBuilder} from "@discordjs/builders";
 
 @singleton()
-export default class LetsPlayCommand extends BasicCommand {
+export default class LetsPlayCommand implements Command {
+
+    private ARG_CATEGORY = "category";
+    private ARG_USER1 = "user1";
+    private ARG_USER2 = "user2";
+    private ARG_USER3 = "user3";
+    private ARG_USER4 = "user4";
+    private ARG_USERS = [this.ARG_USER1, this.ARG_USER2, this.ARG_USER3, this.ARG_USER4];
 
     constructor(
-        private validator: SteamUserCommandInputValidator,
         private userRepository: UserRepository,
         private steamApi: SteamApi,
         private messagePagingService: MessagePagingService,
         private steamGameMessageFormatter: SteamGameMessageFormatter
-    ) {
-        super();
-    }
+    ) {}
 
-    async execute(input: CommandInput): Promise<any> {
+    async execute(interaction: CommandInteraction): Promise<any> {
 
-        // Validate input parameters
-        const validationResult = this.validator.validate(input, 2);
-        if (validationResult.isInvalid) {
-            return input.message.channel.send(validationResult.message ? validationResult.message : CommandUtils.getCommandHelpAsMessageEmbed(this));
-        }
-        input.message.react('👍');
+        const message = await interaction.deferReply({fetchReply: true}) as Message;
+        const discordUsers = this.ARG_USERS.map(arg => interaction.options.getUser(arg)).filter(this.isUser);
+        const users = await this.userRepository.getUsers(discordUsers);
 
         // Get categories from input
-        const categoryIds = LetsPlayUtils.getCategoryIds(input.message);
+        const categoryIds = LetsPlayUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY) as string | undefined);
 
         // Find out games and their details
-        const appIds = await this.steamApi.getMatchingAppIds(input.users);
+        const appIds = await this.steamApi.getMatchingAppIds(users);
         const appDetailList = await this.steamApi.getManyAppDetails(appIds);
         const unknownGames = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, SteamAppUtils.ERROR_CATEGORY_IDS));
         const games = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
@@ -55,17 +55,29 @@ export default class LetsPlayCommand extends BasicCommand {
         const messages = gameMessageEmbeds.concat(unknownGameMessageEmbeds);
 
         // Reply
-        return input.message.channel.send(messages[0]).then(async (sentMessage) => {
+        return interaction.editReply(MessagePayload.create(interaction, {embeds: [messages[0]]})).then(async (sentMessage) => {
             await this.messagePagingService.addPaging(sentMessage.id, messages);
-            return MessagePagingUtils.addControls(sentMessage);
+            return MessagePagingUtils.addControls(message);
         });
     }
 
-    getHelp(): [string, string] {
-        return [locale.command.letsplay.help.command, locale.command.letsplay.help.description];
+    getSlashCommand(): SlashCommandBuilder {
+        return new SlashCommandBuilder()
+            .setName("letsplay")
+            .addStringOption(option => option
+                .setName(this.ARG_CATEGORY)
+                .setDescription("Category")
+                .addChoice("All", "default")
+                .addChoice("Co-Op", "coop")
+                .addChoice("MMO", "mmo"))
+            .addUserOption(option => option.setName(this.ARG_USER1).setDescription("User to play with"))
+            .addUserOption(option => option.setName(this.ARG_USER2).setDescription("User to play with"))
+            .addUserOption(option => option.setName(this.ARG_USER3).setDescription("User to play with"))
+            .addUserOption(option => option.setName(this.ARG_USER4).setDescription("User to play with"))
+            .setDescription(locale.command.letsplay.help.description);
     }
 
-    getKeyword(): string {
-        return "letsplay";
+    private isUser(user: User | null): user is User {
+        return !!user;
     }
 }

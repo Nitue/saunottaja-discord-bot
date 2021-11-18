@@ -1,5 +1,5 @@
 import {inject, singleton} from "tsyringe";
-import {MessageReaction} from "discord.js";
+import {MessageReaction, PartialMessageReaction} from "discord.js";
 import Reaction from "./reaction";
 import {ReactionEvent} from "./reaction-event";
 
@@ -11,8 +11,7 @@ export default class ReactionService {
     ) {
     }
 
-    public findReaction(messageReaction: MessageReaction, reactionEvent: ReactionEvent): Reaction | undefined {
-
+    public findReaction(messageReaction: MessageReaction | PartialMessageReaction, reactionEvent: ReactionEvent): Reaction | undefined {
         if (messageReaction.me) {
             return undefined;
         }

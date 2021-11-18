@@ -6,10 +6,12 @@ Saunottaja is a Discord bot which can find out what Steam games you and your fri
 
 # What can it do?
 
-1. `@Saunottaja letsplay @You @YourFriend @YourAnotherFriend` will list all games you can play with the mentioned users.
-2. `@Saunottaja letsplay random @You @YourFriend @YourAnotherFriend` will suggest a random game you can play with tagged users.
-3. `@Saunottaja steamid 123123` will register `123123` to as your Steam ID for previously listed commands to work.
-4. Mentioning `@Saunottaja` without recognized command will print the instructions for all commands.
+Saunottaja uses Discord's slash commands. Type `/` on your server and see the commands:
+
+* `/letsplay` to find out what games you could play with your friends right now.
+* `/letsbuy` to find out what games you could almost play with your friends. Maybe a game is missing from only one of you?
+* `/suggest` when you have too many choices. Saunottaja will decide for you.
+* `/steamid` to register your Steam ID with the bot. This is required for every user who wants to participate.
 
 # Things to do
 
@@ -20,10 +22,10 @@ Saunottaja is a Discord bot which can find out what Steam games you and your fri
 
 # Known issues and limitations
 
-1. Steam API has limit of 100000 requests per day. 
-2. Some APIs also have a limit for frequent requests which renews in few minutes after `HTTP 429` is given.
+1. Steam API has a limit of 100000 requests per day. 
+2. Some APIs also have a limit for frequent requests which renews in few minutes after `HTTP 429` is given. The bot may be sometimes unable to find information about games.
    
-For these reasons, the **bot is currently only suitable for small servers where constant usage is not needed**. Additionally, usage on multiple servers is not suitable for these reasons. 
+For these reasons, the **bot is currently only suitable for small servers where constant usage is not needed**. Additionally, usage on multiple servers is not recommended. 
 
 # How to use?
 
@@ -32,7 +34,7 @@ Instructions in "Prerequisites" are needed for running the bot and development.
 ## Prerequisites
 
 1. Create an application on the [Discord Developer Portal](https://discord.com/developers/applications) and add a bot to your application. Take a note of your bot token and application id.
-2. Invite your bot to your server: `https://discord.com/api/oauth2/authorize?client_id=YOUR_APPLICATION_ID&permissions=2112&scope=bot` where `YOUR_APPLICATION_ID` is replaced with your actual application id.
+2. Invite your bot to your server: `https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&permissions=2112&scope=bot%20applications.commands` where `YOUR_APPLICATION_ID` is replaced with your actual application id.
 3. Get your [Steam API key](https://steamcommunity.com/dev/apikey).
 
 Note: API keys and tokens are private information, and you should never share these with anyone.
