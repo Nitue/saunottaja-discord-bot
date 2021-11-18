@@ -36,25 +36,25 @@ export default class SuggestCommand implements Command {
 
         const randomGame = await this.getRandomGame(appIds, categoryIds);
         if (randomGame === undefined) {
-            return interaction.editReply(locale.command.suggest.random_death_switch);
+            return interaction.editReply(locale.command.suggest.reply.random_death_switch);
         }
-        return interaction.editReply(MessagePayload.create(interaction, {embeds: [this.steamGameMessageFormatter.formatSingleGame(randomGame, locale.command.suggest.how_about)]}));
+        return interaction.editReply(MessagePayload.create(interaction, {embeds: [this.steamGameMessageFormatter.formatSingleGame(randomGame, locale.command.suggest.reply.how_about)]}));
     }
 
     getSlashCommand(): SlashCommandBuilder {
         return new SlashCommandBuilder()
             .setName("suggest")
+            .addUserOption(option => option.setName(this.ARG_USER1).setDescription(locale.command.suggest.args.user).setRequired(true))
+            .addUserOption(option => option.setName(this.ARG_USER2).setDescription(locale.command.suggest.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER3).setDescription(locale.command.suggest.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER4).setDescription(locale.command.suggest.args.user))
             .addStringOption(option => option
                 .setName(this.ARG_CATEGORY)
-                .setDescription("Category")
+                .setDescription(locale.command.suggest.args.category)
                 .addChoice("All", "default")
                 .addChoice("Co-Op", "coop")
                 .addChoice("MMO", "mmo"))
-            .addUserOption(option => option.setName(this.ARG_USER1).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER2).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER3).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER4).setDescription("User to play with"))
-            .setDescription(locale.command.suggest.help.description);
+            .setDescription(locale.command.suggest.description);
     }
 
     private async getRandomGame(appIds: number[], categoryIds: number[]): Promise<SteamGameDetails | undefined> {

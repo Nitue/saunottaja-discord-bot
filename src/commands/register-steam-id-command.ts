@@ -18,10 +18,10 @@ export default class RegisterSteamIdCommand implements Command {
         const steamId = interaction.options.getString(this.ARG_ID, true);
         try {
             await this.persistSteamId(steamId, interaction.user.id);
-            return interaction.reply({content: "Done! You can now use other commands.", ephemeral: true});
+            return interaction.reply({content: locale.command.steamid.reply.done, ephemeral: true});
         } catch (error) {
             console.error(error);
-            return interaction.reply({content: "Something went seriously wrong! Try again, maybe?", ephemeral: true});
+            return interaction.reply({content: locale.generic.generic_error, ephemeral: true});
         }
     }
 

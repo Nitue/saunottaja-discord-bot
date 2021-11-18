@@ -43,7 +43,7 @@ export default class LetsBuyCommand implements Command{
         const allGames = await this.steamApi.getManyAppDetails(appIds);
         const games = allGames.filter(game => SteamAppUtils.isGameInCategory(game, LetsPlayUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY) as string | undefined)));
 
-        const messages = this.steamGameMessageFormatter.formatAsDetailedFields(games, locale.command.letsbuy.buy_these);
+        const messages = this.steamGameMessageFormatter.formatAsMessageEmbeds(games, locale.command.letsbuy.reply.buy_these);
 
         // Reply
         return interaction.editReply(MessagePayload.create(interaction, {embeds: [messages[0]]})).then(async (sentMessage) => {
@@ -55,17 +55,17 @@ export default class LetsBuyCommand implements Command{
     getSlashCommand(): SlashCommandBuilder {
         return new SlashCommandBuilder()
             .setName("letsbuy")
+            .addUserOption(option => option.setName(this.ARG_USER1).setDescription(locale.command.suggest.args.user).setRequired(true))
+            .addUserOption(option => option.setName(this.ARG_USER2).setDescription(locale.command.suggest.args.user).setRequired(true))
+            .addUserOption(option => option.setName(this.ARG_USER3).setDescription(locale.command.suggest.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER4).setDescription(locale.command.suggest.args.user))
             .addStringOption(option => option
                 .setName(this.ARG_CATEGORY)
-                .setDescription("Category")
+                .setDescription(locale.command.suggest.args.category)
                 .addChoice("All", "default")
                 .addChoice("Co-Op", "coop")
                 .addChoice("MMO", "mmo"))
-            .addUserOption(option => option.setName(this.ARG_USER1).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER2).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER3).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER4).setDescription("User to play with"))
-            .setDescription(locale.command.letsbuy.help.description);
+            .setDescription(locale.command.suggest.description);
     }
 
     private isUser(user: User | null): user is User {

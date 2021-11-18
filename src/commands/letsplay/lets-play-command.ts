@@ -14,11 +14,11 @@ import {SlashCommandBuilder} from "@discordjs/builders";
 @singleton()
 export default class LetsPlayCommand implements Command {
 
-    private ARG_CATEGORY = "category";
-    private ARG_USER1 = "user1";
-    private ARG_USER2 = "user2";
-    private ARG_USER3 = "user3";
-    private ARG_USER4 = "user4";
+    private ARG_CATEGORY = "Category";
+    private ARG_USER1 = "User 1";
+    private ARG_USER2 = "User 2";
+    private ARG_USER3 = "User 3";
+    private ARG_USER4 = "User 4";
     private ARG_USERS = [this.ARG_USER1, this.ARG_USER2, this.ARG_USER3, this.ARG_USER4];
 
     constructor(
@@ -44,14 +44,14 @@ export default class LetsPlayCommand implements Command {
         const games = appDetailList.filter(game => SteamAppUtils.isGameInCategory(game, categoryIds));
 
         // Input and output to messages
+        const categoryNames = categoryIds.map(id => SteamAppUtils.getCategoryName(id)).join(', ');
         const unknownGameMessageEmbeds = this.steamGameMessageFormatter.formatAsUrlList(
             unknownGames,
-            locale.command.letsplay.games_without_info,
-            locale.command.letsplay.you_could_play_these,
-            locale.command.letsplay.games_without_info_detailed
+            locale.command.letsplay.reply.games_without_info,
+            locale.command.letsplay.reply.you_could_play_these,
+            locale.command.letsplay.reply.games_without_info_detailed
         );
-        const categoryNames = categoryIds.map(id => SteamAppUtils.getCategoryName(id)).join(', ');
-        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsDetailedFields(games, locale.command.letsplay.you_could_play_these, categoryNames);
+        const gameMessageEmbeds = this.steamGameMessageFormatter.formatAsMessageEmbeds(games, locale.command.letsplay.reply.you_could_play_these, categoryNames);
         const messages = gameMessageEmbeds.concat(unknownGameMessageEmbeds);
 
         // Reply
@@ -64,17 +64,17 @@ export default class LetsPlayCommand implements Command {
     getSlashCommand(): SlashCommandBuilder {
         return new SlashCommandBuilder()
             .setName("letsplay")
+            .addUserOption(option => option.setName(this.ARG_USER1).setDescription(locale.command.letsplay.args.user).setRequired(true))
+            .addUserOption(option => option.setName(this.ARG_USER2).setDescription(locale.command.letsplay.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER3).setDescription(locale.command.letsplay.args.user))
+            .addUserOption(option => option.setName(this.ARG_USER4).setDescription(locale.command.letsplay.args.user))
             .addStringOption(option => option
                 .setName(this.ARG_CATEGORY)
-                .setDescription("Category")
+                .setDescription(locale.command.letsplay.args.category)
                 .addChoice("All", "default")
                 .addChoice("Co-Op", "coop")
                 .addChoice("MMO", "mmo"))
-            .addUserOption(option => option.setName(this.ARG_USER1).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER2).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER3).setDescription("User to play with"))
-            .addUserOption(option => option.setName(this.ARG_USER4).setDescription("User to play with"))
-            .setDescription(locale.command.letsplay.help.description);
+            .setDescription(locale.command.letsplay.description);
     }
 
     private isUser(user: User | null): user is User {
