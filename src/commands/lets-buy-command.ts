@@ -47,7 +47,7 @@ export default class LetsBuyCommand implements Command{
         const usersAppIdLists = await this.steamApi.getUsersAppIdLists(users);
         const appIdOccurrences = ArrayUtils.getOccurrences(usersAppIdLists);
         const requiredOccurrences = users.length - 1;
-        const appIds = _.keys(_.pickBy(appIdOccurrences, occurrenceCount => occurrenceCount >= requiredOccurrences && occurrenceCount < users.length))
+        const appIds = _.keys(_.pickBy(appIdOccurrences, occurrenceCount => occurrenceCount == requiredOccurrences))
             .map(appId => Number(appId));
         const allGames = await this.steamApi.getManyAppDetails(appIds);
         const categoryIds = CategoryUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY));

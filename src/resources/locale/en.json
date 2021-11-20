@@ -38,13 +38,13 @@
       }
     },
     "letsbuy": {
-      "description": "Shows what games you could almost play together.",
+      "description": "Maybe only one of you don't have a game? Find out and buy a game!",
       "args": {
         "category": "Limit the type of games to suggest",
         "user": "User to play with"
       },
       "reply": {
-        "buy_these": "Some of you could buy these to play something new together!"
+        "buy_these": "One of you needs to buy a game and you can play it together!"
       }
     }
   }

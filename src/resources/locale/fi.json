@@ -1,41 +1,51 @@
 {
   "generic": {
-    "steam_account_missing": "Näyttää siltä, että Steam-tunnus ei ole rekisteröity käyttäjillä: {0}. Rekisteröi Steam-tunnus `steamid`-komennolla."
+    "steam_account_missing": "Näyttää siltä, että Steam-tunnus ei ole rekisteröity käyttäjillä: {0}. Rekisteröi Steam-tunnus `steamid`-komennolla.",
+    "generic_error": "Something went seriously wrong! Try again, maybe?",
+    "command_failed": "Running the command failed: `{0}`"
   },
   "command": {
     "letsplay": {
-      "help": {
-        "command": "letsplay [<tyhjä>/coop/mmo] <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>",
-        "description": "Ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin `steamid`-komennolla."
+      "description": "Ilmoittaa mitä Steam pelejä voisitte pelata. Rekisteröi Steam-tunnus ensin `steamid`-komennolla.",
+      "args": {
+        "category": "Limit the type of games to suggest",
+        "user": "User to play with"
       },
-      "games_without_info": "Pelejä, joista ei voitu hakea tietoja",
-      "games_without_info_detailed": "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä.",
-      "you_could_play_these": "Voisitte pelailla vaikka näitä pelejä"
-    },
-    "steamid": {
-      "help": {
-        "command": "steamid <sinun-steam-id>",
-        "description": "Rekisteröi Steam-tunnus botille. Steam ID on numerosarja."
+      "reply": {
+        "games_without_info": "Pelejä, joista ei voitu hakea tietoja",
+        "games_without_info_detailed": "Näistä peleistä ei saatu haettua lisätietoja. Syynä voi olla väliaikaiset verkko-ongelmat. Lista voi sisältää yksinpelejä.",
+        "you_could_play_these": "Voisitte pelailla vaikka näitä pelejä"
       }
     },
-    "help": {
-      "title": "Ohjeet",
-      "description": "Viestissä pitää mainita minut, ellet lähetä yksityisviestiä. Kaikki toiminnot, joissa pitää mainita muu käyttäjä eivät toimi yksityisviestitse!"
+    "steamid": {
+      "description": "Rekisteröi Steam-tunnus botille. Steam ID on numerosarja.",
+      "args": {
+        "id": "Your Steam ID is a number sequence."
+      },
+      "reply": {
+        "done": "Noin! Nyt voit käyttää muita komentoja."
+      }
     },
     "suggest": {
-      "help": {
-        "command": "suggest [<empty>/coop/mmo] <@You> <@Friend> ... <@AnotherFriend>",
-        "description": "Ehdottaa jotain yksittäistä peliä mitä voisitte pelata yhdessä."
+      "description": "Ehdottaa jotakin peliä mitä voisitte pelata heti.",
+      "args": {
+        "category": "Limit the type of games to suggest",
+        "user": "User to play with"
       },
-      "random_death_switch": "Nyt kävi vähän niin, etten löytänyt riittävän nopeasti peliä, joka olisi sopinut hakukriteereihin. Kokeileppa uudelleen...",
-      "how_about": "Miten olisi vaikkapa..."
+      "reply": {
+        "how_about": "Miten olisi vaikkapa...",
+        "random_death_switch": "Noh, vaikuttaisi siltä etten onnistunut löytämään sopivaa peliä riittävän nopeasti. Kokeile uudelleen?"
+      }
     },
     "letsbuy": {
-      "help": {
-        "command": "letsbuy <@Käyttäjä1> <@Käyttäjä2> ... <@KäyttäjäN>",
-        "description": "Kertoo mitä pelejä voisitte melkein pelata."
+      "description": "Ehkä yhdeltä puuttuu jokin peli? Ostakaa ja pelatkaa!",
+      "args": {
+        "category": "Limit the type of games to suggest",
+        "user": "User to play with"
       },
-      "buy_these": "Osalla teistä on jo nämä pelit. Osalla taas ei."
+      "reply": {
+        "buy_these": "Kun yksi teistä ostaa jonkin näistä, voitte pelata sitä yhdessä!"
+      }
     }
   }
 }
