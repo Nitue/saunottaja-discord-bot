@@ -1,4 +1,4 @@
-import {locale} from "../locale/locale-utils";
+import {locale, LocaleUtils} from "../locale/locale-utils";
 import ArrayUtils from "../common/array-utils";
 import SteamAppUtils from "../steam/steam-app-utils";
 import SteamApi from "../steam/api/steam-api";
@@ -10,6 +10,7 @@ import {SlashCommandBuilder} from "@discordjs/builders";
 import {CommandInteraction, MessagePayload} from "discord.js";
 import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
+import UserUtils from "../users/user-utils";
 
 @singleton()
 export default class SuggestCommand implements Command {
@@ -30,6 +31,12 @@ export default class SuggestCommand implements Command {
     async execute(interaction: CommandInteraction): Promise<any> {
         const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
+        const usersWithoutSteamId = UserUtils.getUsersWithoutSteamId(discordUsers, users);
+
+        if (usersWithoutSteamId.length > 0) {
+            return interaction.editReply(LocaleUtils.process(locale.generic.steam_account_missing, [usersWithoutSteamId.join(", ")]));
+        }
+
         const appIds = await this.steamApi.getMatchingAppIds(users);
         const categoryIds = CategoryUtils.getCategoryIds(interaction.options.getString(this.ARG_CATEGORY));
 

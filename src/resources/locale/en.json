@@ -1,7 +1,8 @@
 {
   "generic": {
     "steam_account_missing": "Looks like Steam ID is not registered by: {0}. Please, register your Steam ID with `steamid` command.",
-    "generic_error": "Something went seriously wrong! Try again, maybe?"
+    "generic_error": "Something went seriously wrong! Try again, maybe?",
+    "command_failed": "Running the command failed: `{0}`"
   },
   "command": {
     "letsplay": {

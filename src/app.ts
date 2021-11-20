@@ -4,6 +4,7 @@ import CommandService from "./commands/command-service";
 import {Client as PgClient} from "pg";
 import {inject, singleton} from "tsyringe";
 import Command from "./commands/command";
+import {locale, LocaleUtils} from "./locale/locale-utils";
 
 @singleton()
 export default class App {
@@ -43,7 +44,12 @@ export default class App {
         const commandName = command.constructor.name;
         console.log(`Executing command: ${commandName}`);
 
-        await command.execute(interaction);
-        console.log(`Command execution finished: ${commandName}`)
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(error);
+            await interaction.editReply(LocaleUtils.process(locale.generic.command_failed, [(error as any).message]));
+        }
+        console.log(`Command execution finished: ${commandName}`);
     }
 }

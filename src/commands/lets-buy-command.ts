@@ -1,4 +1,4 @@
-import {locale} from "../locale/locale-utils";
+import {locale, LocaleUtils} from "../locale/locale-utils";
 import UserRepository from "../users/user-repository";
 import SteamApi from "../steam/api/steam-api";
 import ArrayUtils from "../common/array-utils";
@@ -14,6 +14,7 @@ import {SlashCommandBuilder} from "@discordjs/builders";
 import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
 import ReactionService from "../reactions/reaction-service";
+import UserUtils from "../users/user-utils";
 
 @singleton()
 export default class LetsBuyCommand implements Command{
@@ -37,6 +38,11 @@ export default class LetsBuyCommand implements Command{
         const message = await interaction.deferReply({fetchReply: true}) as Message;
         const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
+        const usersWithoutSteamId = UserUtils.getUsersWithoutSteamId(discordUsers, users);
+
+        if (usersWithoutSteamId.length > 0) {
+            return interaction.editReply(LocaleUtils.process(locale.generic.steam_account_missing, [usersWithoutSteamId.join(", ")]));
+        }
 
         const usersAppIdLists = await this.steamApi.getUsersAppIdLists(users);
         const appIdOccurrences = ArrayUtils.getOccurrences(usersAppIdLists);

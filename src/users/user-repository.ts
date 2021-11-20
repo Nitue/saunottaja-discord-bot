@@ -33,6 +33,10 @@ export default class UserRepository {
     }
 
     public async getUsers(discordUsers: DiscordUser[]): Promise<User[]> {
-        return await Promise.all(discordUsers.map(discordUser => this.getByDiscordUserId(discordUser.id)));
+        return await Promise.all(discordUsers.map(async discordUser => {
+            const user = await this.getByDiscordUserId(discordUser.id);
+            user.discordUserRef = discordUser;
+            return user;
+        }));
     }
 }
