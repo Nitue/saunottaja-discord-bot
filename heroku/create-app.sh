@@ -39,16 +39,10 @@ heroku apps:create "$APP_NAME" --region "$APP_REGION" --addons heroku-postgresql
 heroku stack:set container --app "$APP_NAME"
 heroku config:set ENVIRONMENT=prod BOT_LANGUAGE=en DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN STEAM_WEB_API_KEY=$STEAM_WEB_API_KEY DISCORD_APPLICATION_ID=$DISCORD_APPLICATION_ID --app "$APP_NAME"
 
-# Deploy or exit
-printf "Do you want to deploy the bot? (y/N) "
-read DEPLOY
-
-if [[ $DEPLOY =~ ^[Yy]$ ]]
-then
-  GIT_BRANCH=$(git branch --show-current)
-  git push "$APP_REMOTE" "$GIT_BRANCH:master"
-  heroku ps:scale worker=1 --app "$APP_NAME"
-fi
+# Deploy the application
+GIT_BRANCH=$(git branch --show-current)
+git push "$APP_REMOTE" "$GIT_BRANCH:master"
+heroku ps:scale worker=1 --app "$APP_NAME"
 
 echo "Done. You can delete the application by running: heroku apps:destroy --app $APP_NAME"
 
