@@ -18,12 +18,13 @@
       }
     },
     "steamid": {
-      "description": "Rekisteröi Steam-tunnus botille. Steam ID on numerosarja.",
+      "description": "Rekisteröi Steam-tunnus botille. Voit syöttää joko Steam ID:n (64) tai kustomoidun profiilinimen.",
       "args": {
-        "id": "Your Steam ID is a number sequence."
+        "id": "Your Steam ID (64) or customized profile name."
       },
       "reply": {
-        "done": "Noin! Nyt voit käyttää muita komentoja."
+        "done": "Noin! Nyt voit käyttää muita komentoja.",
+        "invalid": "Syötit virheellisen Steam ID:n tai profiilin nimen: Steam ID:tä ei ollut olemassa tai sitä ei voitu selvittää"
       }
     },
     "suggest": {

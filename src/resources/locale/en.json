@@ -18,12 +18,13 @@
       }
     },
     "steamid": {
-      "description": "Register your Steam ID for the bot. ",
+      "description": "Register your Steam ID for the bot. You can enter your Steam ID (64) or customized profile name.",
       "args": {
-        "id": "Your Steam ID is a number sequence."
+        "id": "Your Steam ID (64) or customized profile name."
       },
       "reply": {
-        "done": "Done! You can now use other commands."
+        "done": "Done! You can now use other commands.",
+        "invalid": "You did not enter a valid Steam ID or customized profile name: Steam ID not found or could not be resolved"
       }
     },
     "suggest": {

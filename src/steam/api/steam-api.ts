@@ -60,4 +60,37 @@ export default class SteamApi {
         const userAppIdLists = await this.getUsersAppIdLists(users);
         return ArrayUtils.getMatchingValues(userAppIdLists);
     }
+
+    public async resolveSteamId(vanityUrl: string): Promise<string | null> {
+        try {
+            console.log(`Resolving Steam ID for ${vanityUrl}...`);
+            const apiMethod = 'ISteamUser/ResolveVanityURL/v1/';
+            const result = await axios.get<SteamResolveVanityUrlResponse>(`${settings.steamWeb.apiUrl}/${apiMethod}`, {
+                params: {
+                    key: process.env.STEAM_WEB_API_KEY,
+                    vanityurl: vanityUrl,
+                    url_type: 1
+                }
+            });
+            return result.data.response.success === 1 ? result.data.response.steamid : null;
+        } catch (e) {
+            throw new SteamApiError("Failed to get application details", e);
+        }
+    }
+
+    public async validateSteamId(steamId: string): Promise<boolean> {
+        try {
+            console.log(`Confirming Steam ID ${steamId}...`);
+            const apiMethod = 'ISteamUser/GetPlayerSummaries/v2/';
+            const result = await axios.get<SteamPlayerSummaryResponse>(`${settings.steamWeb.apiUrl}/${apiMethod}`, {
+                params: {
+                    key: process.env.STEAM_WEB_API_KEY,
+                    steamids: steamId,
+                }
+            });
+            return result.data.response.players.length === 1;
+        } catch (e) {
+            throw new SteamApiError("Failed to get application details", e);
+        }
+    }
 }
