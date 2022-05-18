@@ -37,7 +37,7 @@ read -s STEAM_WEB_API_KEY
 # Create application, addons and configure
 heroku apps:create "$APP_NAME" --region "$APP_REGION" --addons heroku-postgresql:hobby-dev --remote "$APP_REMOTE"
 heroku stack:set container --app "$APP_NAME"
-heroku config:set ENVIRONMENT=prod BOT_LANGUAGE=en DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN STEAM_WEB_API_KEY=$STEAM_WEB_API_KEY DISCORD_APPLICATION_ID=$DISCORD_APPLICATION_ID --app "$APP_NAME"
+heroku config:set DATABASE_SSL=yes BOT_LANGUAGE=en DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN STEAM_WEB_API_KEY=$STEAM_WEB_API_KEY DISCORD_APPLICATION_ID=$DISCORD_APPLICATION_ID --app "$APP_NAME"
 
 # Deploy the application
 GIT_BRANCH=$(git branch --show-current)

@@ -1,35 +1,10 @@
 version: '3.9'
 services:
-  saunottaja-build:
-    build:
-      target: build
-      context: .
-    env_file:
-      - .env
-    command: "npx tsnd --respawn --files ./src/main.ts"
-    volumes:
-      - ./src:/saunottaja/src
-    profiles:
-      - dev
-    depends_on:
-      - postgres
-
   saunottaja:
-    image: saunottaja
-    build:
-      context: .
-    env_file:
-      - .env
-    profiles:
-      - prod
     depends_on:
       - postgres
 
   postgres:
     image: postgres:13.1-alpine
-    environment:
-      POSTGRES_USER: saunottaja
-      POSTGRES_PASSWORD: saunottaja
-      POSTGRES_DB: saunottaja
     expose:
       - 5432

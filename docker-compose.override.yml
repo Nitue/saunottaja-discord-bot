@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  saunottaja:
+    build:
+      target: build
+      context: .
+    command: "npx tsnd --respawn --files ./src/main.ts"
+    env_file:
+      - .env
+    volumes:
+      - ./src:/saunottaja/src
+
+  postgres:
+    environment:
+      POSTGRES_USER: saunottaja
+      POSTGRES_PASSWORD: saunottaja
+      POSTGRES_DB: saunottaja

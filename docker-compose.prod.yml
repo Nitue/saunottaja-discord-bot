@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  saunottaja:
+    image: nitue/saunottaja:${SAUNOTTAJA_VERSION:?err}
+    restart: always
+    env_file:
+      - .env.prod
+
+  postgres:
+    restart: always
+    env_file:
+      - .env.postgres.prod
