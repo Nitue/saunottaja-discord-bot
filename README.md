@@ -29,7 +29,7 @@ For these reasons, the **bot is currently only suitable for small servers where 
 
 Due to the limitations, the bot is not available as public bot. This means you need to run a Saunottaja instance yourself and invite a private bot.
 
-Saunottaja is available as a Docker image which can be used in combination of a database instance. This repository comes with Docker Compose configuration to run Saunottaja with a PostgreSQL instance.
+Saunottaja is available as a [Docker image](https://hub.docker.com/r/nitue/saunottaja) which can be used in combination of a database instance. This repository comes with Docker Compose configuration to run Saunottaja with a PostgreSQL instance.
 
 You can use guides below to run Saunottaja:
 
@@ -57,6 +57,11 @@ For development, see [Development setup](#development-setup).
    ```shell
    $ ./docker-deploy.sh latest
    ```
+
+If you wish to deploy to remote machine from your machine, you can create a docker context and use the deployment script to deploy:
+```shell
+$ ./docker-deploy.sh latest my-context-name
+```
 
 ## Running on Heroku
 
