@@ -77,7 +77,7 @@ $ ./docker-deploy.sh latest my-context-name
 
 1. Make sure you have done [Discord setup](#discord-setup).
 2. Install [Docker](https://www.docker.com/).
-3. Install Node 14.x (or later)
+3. Install Node 16.18 (or later)
 4. Create `.env` file and set values like in the `.env.example` file. Paste your Steam API key, Discord application id and Discord bot token here.
 5. Run the development environment with:
 

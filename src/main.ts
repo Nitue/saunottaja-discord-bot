@@ -2,10 +2,8 @@ import "reflect-metadata";
 
 // Load environment variables from ./.env
 import dotenv from "dotenv";
-dotenv.config();
-
 import {REST} from "@discordjs/rest";
-import {Client as DiscordClient, Intents} from "discord.js";
+import {Client as DiscordClient, GatewayIntentBits} from "discord.js";
 import {container} from "tsyringe";
 import LetsPlayCommand from "./commands/lets-play-command";
 import RegisterSteamIdCommand from "./commands/register-steam-id-command";
@@ -16,6 +14,8 @@ import PreviousPageReaction from "./reactions/previous-page-reaction";
 import SuggestCommand from "./commands/suggest-command";
 import LetsBuyCommand from "./commands/lets-buy-command";
 
+dotenv.config();
+
 // Register db client
 const pgClient = new PgClient({
     connectionString: process.env.DATABASE_URL,
@@ -24,7 +24,7 @@ const pgClient = new PgClient({
 container.registerInstance("pgClient", pgClient);
 
 // Register discord client
-const discordClient = new DiscordClient({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
+const discordClient = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessageReactions] });
 container.registerInstance("discordClient", discordClient);
 
 // Register discord REST API

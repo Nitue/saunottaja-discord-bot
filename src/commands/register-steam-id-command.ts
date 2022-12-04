@@ -1,4 +1,4 @@
-import {CommandInteraction} from "discord.js";
+import {ChatInputCommandInteraction} from "discord.js";
 import UserRepository from "../users/user-repository";
 import {singleton} from "tsyringe";
 import {locale} from "../locale/locale-utils";
@@ -16,7 +16,7 @@ export default class RegisterSteamIdCommand implements Command {
         private steamIdRepository: UserRepository
     ) {}
 
-    async execute(interaction: CommandInteraction): Promise<any> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<any> {
         const steamIdOrVanityUrl = interaction.options.getString(this.ARG_ID, true);
         try {
             const steamId = await this.getAsSteamId(steamIdOrVanityUrl);

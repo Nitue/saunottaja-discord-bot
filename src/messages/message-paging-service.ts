@@ -1,4 +1,4 @@
-import {Message, MessageEmbed, MessageReaction} from "discord.js";
+import {EmbedBuilder, Message, MessageReaction} from "discord.js";
 import MessagePageRepository from "./message-page-repository";
 import MessagePage from "./message-page";
 import {singleton} from "tsyringe";
@@ -14,7 +14,7 @@ export default class MessagePagingService {
     ) {
     }
 
-    public async addPaging(discordMessage: Message, messages: MessageEmbed[]): Promise<any> {
+    public async addPaging(discordMessage: Message, messages: EmbedBuilder[]): Promise<any> {
         await this.messagePagePositionRepository.save(new MessagePagePosition(discordMessage.id, 0));
         return Promise.all(messages
             .map((message, index) => new MessagePage(discordMessage.id, index, message))

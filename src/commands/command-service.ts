@@ -1,5 +1,5 @@
 import Command from "./command";
-import {Collection, CommandInteraction} from "discord.js";
+import {ChatInputCommandInteraction, Collection} from "discord.js";
 import {inject, singleton} from "tsyringe";
 
 import {REST} from "@discordjs/rest";
@@ -14,7 +14,7 @@ export default class CommandService {
         @inject("discordRest") private readonly discordRestApi: REST
     ) {}
 
-    public findCommand(interaction: CommandInteraction): Command | undefined {
+    public findCommand(interaction: ChatInputCommandInteraction): Command | undefined {
         return this.commands.get(interaction.commandName);
     }
 

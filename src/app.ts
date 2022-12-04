@@ -34,7 +34,7 @@ export default class App {
     }
 
     private async handleInteraction(interaction: Interaction) {
-        if (!interaction.isCommand()) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 

@@ -7,7 +7,7 @@ import UserRepository from "../users/user-repository";
 import {singleton} from "tsyringe";
 import Command from "./command";
 import {SlashCommandBuilder} from "@discordjs/builders";
-import {CommandInteraction, MessagePayload} from "discord.js";
+import {ChatInputCommandInteraction, Interaction, MessagePayload} from "discord.js";
 import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
 import UserUtils from "../users/user-utils";
@@ -28,7 +28,7 @@ export default class SuggestCommand implements Command {
         private steamGameMessageFormatter: SteamGameMessageFormatter
     ) {}
 
-    async execute(interaction: CommandInteraction): Promise<any> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<any> {
         const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
         const usersWithoutSteamId = UserUtils.getUsersWithoutSteamId(discordUsers, users);
@@ -46,7 +46,7 @@ export default class SuggestCommand implements Command {
         if (randomGame === undefined) {
             return interaction.editReply(locale.command.suggest.reply.random_death_switch);
         }
-        return interaction.editReply(MessagePayload.create(interaction, {embeds: [this.steamGameMessageFormatter.formatSingleGame(randomGame, locale.command.suggest.reply.how_about)]}));
+        return interaction.editReply(MessagePayload.create(interaction as Interaction, {embeds: [this.steamGameMessageFormatter.formatSingleGame(randomGame, locale.command.suggest.reply.how_about)]}));
     }
 
     getSlashCommand(): SlashCommandBuilder {
@@ -59,9 +59,11 @@ export default class SuggestCommand implements Command {
             .addStringOption(option => option
                 .setName(this.ARG_CATEGORY)
                 .setDescription(locale.command.suggest.args.category)
-                .addChoice("All", "default")
-                .addChoice("Co-Op", "coop")
-                .addChoice("MMO", "mmo"))
+                .addChoices(...[
+                    {name: "All", value: "default"},
+                    {name: "Co-Op", value: "coop"},
+                    {name: "MMO", value: "mmo"}
+                ]))
             .setDescription(locale.command.suggest.description);
     }
 

@@ -9,7 +9,7 @@ import MessagePagingService from "../messages/message-paging-service";
 import {singleton} from "tsyringe";
 import SteamAppUtils from "../steam/steam-app-utils";
 import Command from "./command";
-import {CommandInteraction, Message} from "discord.js";
+import {ChatInputCommandInteraction, Message} from "discord.js";
 import {SlashCommandBuilder} from "@discordjs/builders";
 import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
@@ -34,7 +34,7 @@ export default class LetsBuyCommand implements Command{
         private reactionService: ReactionService
     ) {}
 
-    async execute(interaction: CommandInteraction): Promise<any> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<any> {
         const message = await interaction.deferReply({fetchReply: true}) as Message;
         const discordUsers = InteractionUtils.getDiscordUsers(interaction, this.ARG_USERS);
         const users = await this.userRepository.getUsers(discordUsers);
@@ -73,9 +73,11 @@ export default class LetsBuyCommand implements Command{
             .addStringOption(option => option
                 .setName(this.ARG_CATEGORY)
                 .setDescription(locale.command.letsbuy.args.category)
-                .addChoice("All", "default")
-                .addChoice("Co-Op", "coop")
-                .addChoice("MMO", "mmo"))
+                .addChoices(...[
+                    {name: "All", value: "default"},
+                    {name: "Co-Op", value: "coop"},
+                    {name: "MMO", value: "mmo"}
+                ]))
             .setDescription(locale.command.letsbuy.description);
     }
 

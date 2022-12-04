@@ -1,8 +1,8 @@
-import {CommandInteraction, MessageEmbed, MessagePayload, User} from "discord.js";
+import {ChatInputCommandInteraction, EmbedBuilder, Interaction, MessagePayload, User} from "discord.js";
 import _ from "lodash";
 
 export default class InteractionUtils {
-    public static getDiscordUsers(interaction: CommandInteraction, fromArgs?: string[]): User[] {
+    public static getDiscordUsers(interaction: ChatInputCommandInteraction, fromArgs?: string[]): User[] {
         let users: User[] = [];
         if (fromArgs) {
             users = fromArgs.map(arg => interaction.options.getUser(arg)).filter(this.isUser);
@@ -11,8 +11,8 @@ export default class InteractionUtils {
         return _.uniqBy(users, "id");
     }
 
-    public static editReplyEmbeds(interaction: CommandInteraction, embeds: MessageEmbed[]) {
-        return interaction.editReply(MessagePayload.create(interaction, {embeds}))
+    public static editReplyEmbeds(interaction: ChatInputCommandInteraction, embeds: EmbedBuilder[]) {
+        return interaction.editReply(MessagePayload.create(interaction as Interaction, {embeds}))
     }
 
     private static isUser(user: User | null): user is User {
