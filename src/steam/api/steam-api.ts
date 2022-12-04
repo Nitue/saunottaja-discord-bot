@@ -5,11 +5,13 @@ import ArrayUtils from "../../common/array-utils";
 import User from "../../users/user";
 import SteamAppUtils from "../steam-app-utils";
 import {SteamApiError} from "./steam-api-error";
+import ObjectUtils from "../../common/object-utils";
 
 @singleton()
 export default class SteamApi {
 
     public async getOwnedGames(user: User): Promise<SteamOwnedGames> {
+        let games: SteamOwnedGames;
         try {
             console.log(`Fetching owned games for ${user.steamId}...`);
             const apiMethod = 'IPlayerService/GetOwnedGames/v0001/';
@@ -19,10 +21,16 @@ export default class SteamApi {
                     steamid: user.steamId
                 }
             });
-            return result.data.response;
+            games = result.data.response;
         } catch (e) {
-            throw new SteamApiError(`Failed to get games for ${user.discordUserRef?.username} (steam id maybe wrong or profile is not public)`, e);
+            throw new SteamApiError(`Failed to get games for ${user.discordUserRef?.username}. Steam ID is probably wrong.`, e);
         }
+
+        if (ObjectUtils.isEmptyObject(games)) {
+            throw new SteamApiError(`Failed to get games for ${user.discordUserRef?.username}. Profile is probably private.`);
+        }
+
+        return games;
     }
 
     public async getAppDetails(appId: number): Promise<SteamGameDetails> {
