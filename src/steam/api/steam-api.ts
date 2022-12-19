@@ -6,6 +6,7 @@ import User from "../../users/user";
 import SteamAppUtils from "../steam-app-utils";
 import {SteamApiError} from "./steam-api-error";
 import ObjectUtils from "../../common/object-utils";
+import {log} from "../../logs/logging";
 
 @singleton()
 export default class SteamApi {
@@ -13,7 +14,7 @@ export default class SteamApi {
     public async getOwnedGames(user: User): Promise<SteamOwnedGames> {
         let games: SteamOwnedGames;
         try {
-            console.log(`Fetching owned games for ${user.steamId}...`);
+            log.info(`Fetching owned games for ${user.steamId}...`);
             const apiMethod = 'IPlayerService/GetOwnedGames/v0001/';
             const result = await axios.get<SteamOwnedGamesResponse>(`${settings.steamWeb.apiUrl}/${apiMethod}`, {
                 params: {
@@ -35,7 +36,7 @@ export default class SteamApi {
 
     public async getAppDetails(appId: number): Promise<SteamGameDetails> {
         try {
-            console.log(`Fetching application details for ${appId}...`);
+            log.info(`Fetching application details for ${appId}...`);
             const apiMethod = 'appdetails';
             const result = await axios.get<any>(`${settings.steamStore.apiUrl}/${apiMethod}`, {
                 params: {
@@ -71,7 +72,7 @@ export default class SteamApi {
 
     public async resolveSteamId(vanityUrl: string): Promise<string | null> {
         try {
-            console.log(`Resolving Steam ID for ${vanityUrl}...`);
+            log.info(`Resolving Steam ID for ${vanityUrl}...`);
             const apiMethod = 'ISteamUser/ResolveVanityURL/v1/';
             const result = await axios.get<SteamResolveVanityUrlResponse>(`${settings.steamWeb.apiUrl}/${apiMethod}`, {
                 params: {
@@ -82,13 +83,13 @@ export default class SteamApi {
             });
             return result.data.response.success === 1 ? result.data.response.steamid : null;
         } catch (e) {
-            throw new SteamApiError("Failed to get application details", e);
+            throw new SteamApiError("Failed to resolve Steam ID", e);
         }
     }
 
     public async validateSteamId(steamId: string): Promise<boolean> {
         try {
-            console.log(`Confirming Steam ID ${steamId}...`);
+            log.info(`Confirming existence of Steam ID ${steamId}...`);
             const apiMethod = 'ISteamUser/GetPlayerSummaries/v2/';
             const result = await axios.get<SteamPlayerSummaryResponse>(`${settings.steamWeb.apiUrl}/${apiMethod}`, {
                 params: {
@@ -98,7 +99,7 @@ export default class SteamApi {
             });
             return result.data.response.players.length === 1;
         } catch (e) {
-            throw new SteamApiError("Failed to get application details", e);
+            throw new SteamApiError("Failed to validate Steam ID", e);
         }
     }
 }

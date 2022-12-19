@@ -1,6 +1,7 @@
 import {inject, singleton} from "tsyringe";
 import {Client as DiscordClient, Message, MessageReaction} from "discord.js";
 import Reaction from "./reaction";
+import {log} from "../logs/logging";
 
 @singleton()
 export default class ReactionService {
@@ -12,24 +13,24 @@ export default class ReactionService {
     }
 
     public listenReactions(discordMessage: Message) {
-        console.log('Listening for reactions...');
+        log.info('Listening for reactions...');
         discordMessage.awaitReactions({time: 120000, max: 1}).then(async collected => {
             const messageReaction = collected.first();
             if (messageReaction) {
                 const reaction = this.findReaction(messageReaction);
                 if (reaction) {
                     const reactionName = reaction.constructor.name;
-                    console.log(`Executing reaction: ${reactionName}`);
+                    log.info(`Executing reaction: ${reactionName}`);
                     await reaction?.execute(messageReaction);
                     await this.removeUserReactions(messageReaction);
-                    console.log(`Reaction execution finished: ${reactionName}`);
+                    log.info(`Reaction execution finished: ${reactionName}`);
                 }
 
                 // Start listening for reactions again
                 this.listenReactions(discordMessage);
             } else {
                 await discordMessage.reactions.removeAll();
-                console.log("Stopped listening for reactions");
+                log.info("Stopped listening for reactions");
             }
         });
     }

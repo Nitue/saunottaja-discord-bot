@@ -13,6 +13,7 @@ import NextPageReaction from "./reactions/next-page-reaction";
 import PreviousPageReaction from "./reactions/previous-page-reaction";
 import SuggestCommand from "./commands/suggest-command";
 import LetsBuyCommand from "./commands/lets-buy-command";
+import {log} from "./logs/logging";
 
 dotenv.config();
 
@@ -51,11 +52,11 @@ container.register("commands", {
 
 // Shutdown clean up
 const shutdown = async () => {
-    console.log("Shutting down...");
+    log.info("Shutting down...");
     discordClient.destroy();
-    console.log("Discord client disconnected");
+    log.info("Discord client disconnected");
     await pgClient.end().then(() => {
-        console.log("PgClient disconnected");
+        log.info("PgClient disconnected");
         process.exit(0);
     });
 }
@@ -65,4 +66,4 @@ process.on("exit", () => process.stdout.write('Good bye\n\n'));
 
 // Start the application
 const app = container.resolve(App);
-app.run().then(() => console.log("Application started"))
+app.run().then(() => log.info("Application started"))

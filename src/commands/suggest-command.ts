@@ -11,6 +11,7 @@ import {ChatInputCommandInteraction, Interaction, MessagePayload} from "discord.
 import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
 import UserUtils from "../users/user-utils";
+import {log} from "../logs/logging";
 
 @singleton()
 export default class SuggestCommand implements Command {
@@ -78,7 +79,7 @@ export default class SuggestCommand implements Command {
             }
             return game;
         }
-        console.log(`Killswitched after ${killSwitchCounter} tries!`);
+        log.info(`Killswitched after ${killSwitchCounter} tries!`);
         return undefined;
     }
 }

@@ -2,6 +2,7 @@ import {Client, QueryResult} from "pg";
 import {inject, singleton} from "tsyringe";
 import User from "./user";
 import {User as DiscordUser} from "discord.js";
+import {log} from "../logs/logging";
 
 
 @singleton()
@@ -19,7 +20,6 @@ export default class UserRepository {
     }
 
     public async getByDiscordUserId(discordUserId: string): Promise<User> {
-        console.log(`Getting user for discord id ${discordUserId}...`);
         const result = await this.pgClient.query({
             text: 'SELECT * FROM "user" WHERE discord_user_id = $1',
             values: [discordUserId]

@@ -1,6 +1,7 @@
 import {Client} from "pg";
 import fs from "fs";
 import path from "path";
+import {log} from "../logs/logging";
 
 const CHANGELOGS_PATH = "../resources/db/";
 
@@ -23,8 +24,8 @@ export default async function migrate(client: Client) {
         await client.query('COMMIT');
         return migrationResult;
     } catch (err) {
-        console.error('Migration failed:', err);
-        return client.query("ROLLBACK").then(() => console.log('Rollback finished'));
+        log.error('Migration failed:', err);
+        return client.query("ROLLBACK").then(() => log.info('Rollback finished'));
     }
 }
 
@@ -33,7 +34,7 @@ function getMigratedFiles(client: Client): Promise<string[]> {
         .then(result => result.rows.map(row => row.file))
         .catch(err => {
             if (err.message === 'relation "migration" does not exist') {
-                console.log("No migration log. Assume it's first migration.");
+                log.info("No migration log. Assume it's first migration.");
             }
             return [];
         });

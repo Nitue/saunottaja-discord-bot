@@ -4,6 +4,7 @@ import MessagePage from "./message-page";
 import {singleton} from "tsyringe";
 import MessagePagePositionRepository from "./message-page-position-repository";
 import MessagePagePosition from "./message-page-position";
+import {log} from "../logs/logging";
 
 @singleton()
 export default class MessagePagingService {
@@ -27,7 +28,7 @@ export default class MessagePagingService {
 
         // Not a paged message, stop execution
         if (!messagePagePosition) {
-            console.log('Message is not paged');
+            log.warning('Message is not paged');
             return undefined;
         }
         const nextIndex = messagePagePosition.currentPageIndex += moveDirection;
@@ -35,7 +36,7 @@ export default class MessagePagingService {
 
         // Requested page does not exist, stop execution
         if (!messagePage) {
-            console.log('Requested page did not exist');
+            log.warning('Requested page did not exist');
             return undefined;
         }
 
@@ -44,7 +45,6 @@ export default class MessagePagingService {
         const message = await messageReaction.message.edit({
             embeds: [messagePage.pageContent]
         });
-        console.log('Page loaded');
         return message;
     }
 }

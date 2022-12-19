@@ -5,6 +5,7 @@ import {locale} from "../locale/locale-utils";
 import Command from "./command";
 import {SlashCommandBuilder} from "@discordjs/builders";
 import SteamApi from "../steam/api/steam-api";
+import {log} from "../logs/logging";
 
 @singleton()
 export default class RegisterSteamIdCommand implements Command {
@@ -26,7 +27,7 @@ export default class RegisterSteamIdCommand implements Command {
             await this.persistSteamId(steamId, interaction.user.id);
             return interaction.reply({content: locale.command.steamid.reply.done, ephemeral: true});
         } catch (error) {
-            console.error(error);
+            log.error(error);
             return interaction.reply({content: locale.generic.generic_error, ephemeral: true});
         }
     }
@@ -43,20 +44,21 @@ export default class RegisterSteamIdCommand implements Command {
             if (await this.steamApi.validateSteamId(steamIdOrVanityUrl)) {
                 return steamIdOrVanityUrl;
             }
-            return this.steamApi.resolveSteamId(steamIdOrVanityUrl);
         }
-        const steamId = this.steamApi.resolveSteamId(steamIdOrVanityUrl);
+        const steamId = await this.steamApi.resolveSteamId(steamIdOrVanityUrl);
         if (!steamId) {
-            return await this.steamApi.validateSteamId(steamIdOrVanityUrl) ? steamIdOrVanityUrl : null;
+            log.warning(`Could not resolve Steam ID of ${steamIdOrVanityUrl}`)
+            return null;
         }
-        return steamId;
+        return await this.steamApi.validateSteamId(steamId) ? steamId : null;
     }
 
     private isProbablySteamId(steamIdOrVanityUrl: string): boolean {
-        return steamIdOrVanityUrl.search(/[^0-9]/) !== -1;
+        return steamIdOrVanityUrl.search(/^[0-9]{17}$/) !== -1;
     }
 
     private async persistSteamId(steamIdNumber: string, discordUserId: string): Promise<any> {
+        log.info(`Persisting Steam ID ${steamIdNumber} for discord user ${discordUserId}...`);
         const steamId = await this.steamIdRepository.getByDiscordUserId(discordUserId);
         steamId.steamId = String(steamIdNumber);
         return this.steamIdRepository.save(steamId);

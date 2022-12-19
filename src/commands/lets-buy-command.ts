@@ -15,6 +15,7 @@ import CategoryUtils from "../common/category-utils";
 import InteractionUtils from "../common/interaction-utils";
 import ReactionService from "../reactions/reaction-service";
 import UserUtils from "../users/user-utils";
+import {log} from "../logs/logging";
 
 @singleton()
 export default class LetsBuyCommand implements Command{
@@ -41,6 +42,7 @@ export default class LetsBuyCommand implements Command{
         const usersWithoutSteamId = UserUtils.getUsersWithoutSteamId(discordUsers, users);
 
         if (usersWithoutSteamId.length > 0) {
+            log.warning('One or more players have not registered a Steam ID for the bot: ', usersWithoutSteamId);
             return interaction.editReply(LocaleUtils.process(locale.generic.steam_account_missing, [usersWithoutSteamId.join(", ")]));
         }
 
@@ -57,6 +59,7 @@ export default class LetsBuyCommand implements Command{
 
         // Reply
         return InteractionUtils.editReplyEmbeds(interaction, [messages[0]]).then(async () => {
+            if (messages.length === 1) return;
             await this.messagePagingService.addPaging(message, messages);
             await MessagePagingUtils.addControls(message);
             this.reactionService.listenReactions(message);
