@@ -2,6 +2,9 @@
 
 Saunottaja is a Discord bot which can find out what Steam games you and your friends could play together.
 
+> [!WARNING]
+> **Archived!** Steam has built-in features for doing the same thing, making this bot is obsolete.
+
 ![Saunottaja letsplay command](doc/saunottaja-discord-bot.png)
 
 ## What can it do?
